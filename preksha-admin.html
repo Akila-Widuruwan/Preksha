@@ -316,9 +316,48 @@
   .menu-btn{display:none;}
   .overlay-scrim{position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:390; display:none;}
   .overlay-scrim.show{display:block;}
+
+  /* ---------- Loading transitions ---------- */
+  .top-progress{
+    position:fixed; top:0; left:0; height:3px; width:0%;
+    background:linear-gradient(90deg, var(--accent, #ff3d6e), var(--accent-2, #ffb020));
+    z-index:9999; opacity:0; border-radius:0 4px 4px 0;
+    transition:width .6s cubic-bezier(.4,0,.2,1), opacity .35s ease;
+    pointer-events:none;
+  }
+  .top-progress.active{ opacity:1; width:78%; }
+  .top-progress.done{ width:100%; opacity:0; transition:width .3s ease, opacity .5s ease .2s; }
+
+  @keyframes shimmer{
+    0%{ background-position:-220px 0; }
+    100%{ background-position:220px 0; }
+  }
+  .skeleton-text{
+    display:inline-block; height:0.95em; width:70%; min-width:40px; border-radius:4px;
+    background:linear-gradient(90deg, var(--line) 25%, var(--bg-raised) 50%, var(--line) 75%);
+    background-size:300px 100%;
+    animation:shimmer 1.2s ease-in-out infinite;
+    vertical-align:middle;
+  }
+  .stat-value.is-loading .skeleton-text{ width:70px; height:1.7rem; }
+  .skeleton-row td{ padding:1rem 1.4rem; }
+
+  @keyframes rowIn{
+    from{ opacity:0; transform:translateY(6px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  tbody tr{ animation:rowIn .3s ease both; }
+  .admin-product-card{ animation:rowIn .35s ease both; }
+
+  @media (prefers-reduced-motion: reduce){
+    .skeleton-text{ animation:none; }
+    tbody tr, .admin-product-card{ animation:none; }
+    .top-progress{ transition:none; }
+  }
 </style>
 </head>
 <body>
+  <div class="top-progress" id="topProgress"></div>
 
   <!-- ===== Login gate ===== -->
   <div class="login-screen" id="loginScreen">
@@ -788,7 +827,46 @@
   let productOverridesCache = {};
   let customProductsCache = [];
 
+  const topProgress = document.getElementById('topProgress');
+  function showTopLoader() {
+    topProgress.classList.remove('done');
+    topProgress.classList.add('active');
+  }
+  function hideTopLoader() {
+    topProgress.classList.remove('active');
+    topProgress.classList.add('done');
+    setTimeout(() => topProgress.classList.remove('done'), 500);
+  }
+
+  function skeletonRows(colspan, count) {
+    return Array.from({ length: count })
+      .map(() => `<tr class="skeleton-row"><td colspan="${colspan}"><span class="skeleton-text"></span></td></tr>`)
+      .join('');
+  }
+
+  // Shown only on the very first load after login, so the dashboard is never
+  // just a blank screen while the initial Sheet fetch is in flight.
+  function showSkeletons() {
+    ['statRevenue', 'statOrders', 'statPending', 'statCustomers'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('is-loading');
+      el.innerHTML = '<span class="skeleton-text"></span>';
+    });
+    const recentBody = document.getElementById('recentOrdersBody');
+    if (recentBody) recentBody.innerHTML = skeletonRows(5, 3);
+    const ordersBody = document.getElementById('ordersTableBody');
+    if (ordersBody) ordersBody.innerHTML = skeletonRows(6, 4);
+    const grid = document.getElementById('productsGrid');
+    if (grid) {
+      grid.innerHTML = Array.from({ length: 3 })
+        .map(() => `<div class="admin-product-card skeleton-row"><span class="skeleton-text" style="width:100%;height:64px;"></span></div>`)
+        .join('');
+    }
+  }
+
   async function refreshCache(){
+    showTopLoader();
     try {
       const [orders, overrides, custom] = await Promise.all([
         apiGet('getOrders'), apiGet('getProducts'), apiGet('getCustomProducts')
@@ -798,6 +876,8 @@
       customProductsCache = custom;
     } catch (err) {
       console.error('refreshCache failed:', err);
+    } finally {
+      hideTopLoader();
     }
   }
 
@@ -1336,24 +1416,29 @@
   });
 
   // ============ Init / refresh ============
-  async function renderAll(){
+  async function renderAll(isFirstLoad){
+    if (isFirstLoad) showSkeletons();
     await refreshCache();
+    ['statRevenue', 'statOrders', 'statPending', 'statCustomers'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('is-loading');
+    });
     renderDashboard();
     renderOrders();
     renderProductsPage();
   }
 
   function init(){
-    renderAll();
+    renderAll(true);
 
     // Orders/products live in the shared Google Sheet now, so poll it
     // periodically and on focus to pick up changes from any device.
-    setInterval(renderAll, 5000);
-    window.addEventListener('focus', renderAll);
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) renderAll(); });
+    setInterval(() => renderAll(false), 5000);
+    window.addEventListener('focus', () => renderAll(false));
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) renderAll(false); });
 
     document.getElementById('refreshBtn').addEventListener('click', () => {
-      renderAll();
+      renderAll(false);
       const btn = document.getElementById('refreshBtn');
       btn.style.transform = 'rotate(360deg)';
       btn.style.transition = 'transform .5s';
