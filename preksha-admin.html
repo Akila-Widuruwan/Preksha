@@ -257,6 +257,7 @@
   }
   .apc-toggle.on{background:rgba(31,166,97,0.18); border-color:var(--ok);}
   .apc-toggle.on .knob{transform:translateX(16px); background:var(--ok);}
+  .apc-toggle.busy{opacity:0.55; cursor:wait;}
 
   .apc-fields{display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; margin-bottom:0.8rem;}
   .apc-field label{display:block; font-size:0.7rem; color:var(--text-faint); font-weight:700; margin-bottom:0.3rem; text-transform:uppercase; letter-spacing:0.04em;}
@@ -796,7 +797,12 @@
     document.getElementById('pageTitle').textContent = pageMeta[name].title;
     document.getElementById('pageSub').textContent = pageMeta[name].sub;
     sidebar.classList.remove('open'); scrim.classList.remove('show');
+    currentPage = name;
+    // Show the latest data the moment the admin navigates to Products,
+    // even though background polling no longer auto-refreshes this page.
+    if (name === 'products') renderProductsPage();
   }
+  let currentPage = 'dashboard';
   document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', () => showPage(item.dataset.page));
   });
@@ -867,6 +873,16 @@
   }
 
   async function refreshCache(){
+    // Serialize calls: if a refresh is already running, queue this one after
+    // it finishes instead of firing a second overlapping fetch. Without this,
+    // a background poll started just before a save's own post-save refresh
+    // could resolve later with stale data and stomp the just-saved change
+    // (this was the cause of toggles silently reverting).
+    refreshQueue = refreshQueue.then(() => doRefreshCache());
+    return refreshQueue;
+  }
+  let refreshQueue = Promise.resolve();
+  async function doRefreshCache(){
     showTopLoader();
     try {
       const [orders, overrides, custom] = await Promise.all([
@@ -1210,47 +1226,76 @@
     });
 
     grid.querySelectorAll('.apc-toggle').forEach(toggle => {
-      toggle.addEventListener('click', () => {
+      toggle.addEventListener('click', async () => {
+        if (toggle.classList.contains('busy')) return; // already saving — ignore extra clicks
         const id = toggle.dataset.id;
-        const isOn = toggle.classList.toggle('on');
-        if (defaultProducts.find(p => p.id === id)) {
-          saveProductOverride(id, { active: isOn });
-        } else {
-          const custom = loadCustomProducts();
-          const p = custom.find(p => p.id === id);
-          if (p) { p.active = isOn; saveCustomProducts(custom); }
+        const isOn = !toggle.classList.contains('on');
+        toggle.classList.add('busy');
+        toggle.classList.toggle('on', isOn); // optimistic UI
+        try {
+          if (defaultProducts.find(p => p.id === id)) {
+            await saveProductOverride(id, { active: isOn });
+          } else {
+            const custom = loadCustomProducts();
+            const p = custom.find(p => p.id === id);
+            if (p) { p.active = isOn; await saveCustomProducts(custom); }
+          }
+          renderDashboard();
+        } catch (err) {
+          console.error('Failed to update product status:', err);
+          toggle.classList.toggle('on', !isOn); // revert — save failed
+          alert('Could not update this product — check your connection and try again.');
+        } finally {
+          toggle.classList.remove('busy');
         }
-        renderDashboard();
       });
     });
 
     grid.querySelectorAll('.apc-save').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const card = btn.closest('.admin-product-card');
         const id = btn.dataset.id;
         const price = parseFloat(card.querySelector('.f-price').value) || 0;
         const original = parseFloat(card.querySelector('.f-original').value) || 0;
-        if (defaultProducts.find(p => p.id === id)) {
-          saveProductOverride(id, { price, original });
-        } else {
-          const custom = loadCustomProducts();
-          const p = custom.find(p => p.id === id);
-          if (p) { p.price = price; p.original = original; saveCustomProducts(custom); }
+        const originalLabel = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Saving…';
+        try {
+          if (defaultProducts.find(p => p.id === id)) {
+            await saveProductOverride(id, { price, original });
+          } else {
+            const custom = loadCustomProducts();
+            const p = custom.find(p => p.id === id);
+            if (p) { p.price = price; p.original = original; await saveCustomProducts(custom); }
+          }
+          const msg = card.querySelector('.apc-saved-msg');
+          msg.classList.add('show');
+          setTimeout(() => msg.classList.remove('show'), 1400);
+          renderDashboard();
+        } catch (err) {
+          console.error('Failed to save product:', err);
+          alert('Could not save changes — check your connection and try again.');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = originalLabel;
         }
-        const msg = card.querySelector('.apc-saved-msg');
-        msg.classList.add('show');
-        setTimeout(() => msg.classList.remove('show'), 1400);
-        renderDashboard();
       });
     });
 
     grid.querySelectorAll('.apc-delete').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         if (!confirm('Remove this plan from the storefront?')) return;
         const id = btn.dataset.id;
-        saveCustomProducts(loadCustomProducts().filter(p => p.id !== id));
-        renderProductsPage();
-        renderDashboard();
+        btn.disabled = true;
+        try {
+          await saveCustomProducts(loadCustomProducts().filter(p => p.id !== id));
+          renderProductsPage();
+          renderDashboard();
+        } catch (err) {
+          console.error('Failed to delete product:', err);
+          alert('Could not delete — check your connection and try again.');
+          btn.disabled = false;
+        }
       });
     });
   }
@@ -1324,7 +1369,7 @@
   document.getElementById('cancelProductBtn').addEventListener('click', () => productModal.style.display = 'none');
   productModal.addEventListener('click', e => { if (e.target === productModal) productModal.style.display = 'none'; });
 
-  document.getElementById('saveProductModalBtn').addEventListener('click', () => {
+  document.getElementById('saveProductModalBtn').addEventListener('click', async () => {
     const nameEn = document.getElementById('npNameEn').value.trim();
     const nameSi = document.getElementById('npNameSi').value.trim() || nameEn;
     const tag = document.getElementById('npTag').value.trim() || 'Streaming';
@@ -1338,43 +1383,56 @@
       return;
     }
 
-    if (editingProductId) {
-      const isDefault = defaultProducts.find(p => p.id === editingProductId);
-      if (isDefault) {
-        saveProductOverride(editingProductId, {
-          name: nameEn, tag, desc: descEn,
-          nameSi, tagSi: tag, descSi,
-          price, original, logo: newProductLogo || null
-        });
-      } else {
-        const custom = loadCustomProducts();
-        const p = custom.find(p => p.id === editingProductId);
-        if (p) {
-          p.price = price; p.original = original; p.logo = newProductLogo || null;
-          p.en = { name: nameEn, tag, desc: descEn };
-          p.si = { name: nameSi, tag, desc: descSi };
-          saveCustomProducts(custom);
+    const saveBtn = document.getElementById('saveProductModalBtn');
+    const originalLabel = saveBtn.textContent;
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+
+    try {
+      if (editingProductId) {
+        const isDefault = defaultProducts.find(p => p.id === editingProductId);
+        if (isDefault) {
+          await saveProductOverride(editingProductId, {
+            name: nameEn, tag, desc: descEn,
+            nameSi, tagSi: tag, descSi,
+            price, original, logo: newProductLogo || null
+          });
+        } else {
+          const custom = loadCustomProducts();
+          const p = custom.find(p => p.id === editingProductId);
+          if (p) {
+            p.price = price; p.original = original; p.logo = newProductLogo || null;
+            p.en = { name: nameEn, tag, desc: descEn };
+            p.si = { name: nameSi, tag, desc: descSi };
+            await saveCustomProducts(custom);
+          }
         }
+      } else {
+        const slug = nameEn.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || 'plan';
+        const existingIds = new Set(loadProducts().map(p => p.id));
+        let id = slug, n = 2;
+        while (existingIds.has(id)) { id = `${slug}-${n++}`; }
+
+        const custom = loadCustomProducts();
+        custom.push({
+          id, price, original, active: true, logo: newProductLogo || null,
+          en: { name: nameEn, tag, desc: descEn },
+          si: { name: nameSi, tag, desc: descSi }
+        });
+        await saveCustomProducts(custom);
       }
-    } else {
-      const slug = nameEn.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || 'plan';
-      const existingIds = new Set(loadProducts().map(p => p.id));
-      let id = slug, n = 2;
-      while (existingIds.has(id)) { id = `${slug}-${n++}`; }
 
-      const custom = loadCustomProducts();
-      custom.push({
-        id, price, original, active: true, logo: newProductLogo || null,
-        en: { name: nameEn, tag, desc: descEn },
-        si: { name: nameSi, tag, desc: descSi }
-      });
-      saveCustomProducts(custom);
+      productModal.style.display = 'none';
+      resetLogoPicker(null);
+      renderProductsPage();
+      renderDashboard();
+    } catch (err) {
+      console.error('Failed to save product:', err);
+      document.getElementById('productModalError').textContent = 'Could not save — check your connection and try again.';
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = originalLabel;
     }
-
-    productModal.style.display = 'none';
-    resetLogoPicker(null);
-    renderProductsPage();
-    renderDashboard();
   });
 
   // ============ CSV export ============
@@ -1426,7 +1484,14 @@
     });
     renderDashboard();
     renderOrders();
-    renderProductsPage();
+    // Never auto-redraw the Products grid while the admin is actively on
+    // that page — a background poll mid-edit would wipe unsaved price
+    // changes and can visually revert a toggle that's still mid-save.
+    // It's kept fresh instead by: first load, navigating to the page,
+    // and immediately after each save/toggle/delete succeeds.
+    if (isFirstLoad || currentPage !== 'products') {
+      renderProductsPage();
+    }
   }
 
   function init(){
