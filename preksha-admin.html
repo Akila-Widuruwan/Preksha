@@ -811,7 +811,7 @@
   });
 
   // ============ Shared database (Google Sheets via Apps Script) ============
-  const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbySseMoj99vuAlCQTIHGgpgEvJcmhPCrPHhUeABKHm_u_WjO39V8xoB8WebOMCoxOUgJw/exec';
+  const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbwi2rFDzQWJkdRp7Sad3qjvCOtyqImJcM0Ed5xmri7LalvozR9EXDDTK79-kboVZoAIfA/exec';
   async function apiGet(action, params = {}) {
     const qs = new URLSearchParams({ action, ...params });
     const res = await fetch(`${SHEETS_API_URL}?${qs}`);
