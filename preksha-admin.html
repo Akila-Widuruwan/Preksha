@@ -16,6 +16,7 @@
     --ok:#1fa661; --ok-bg:rgba(31,166,97,0.14);
     --warn:#e0a800; --warn-bg:rgba(224,168,0,0.14);
     --bad:#e5484d; --bad-bg:rgba(229,72,77,0.14);
+    --info:#6e7dff; --info-bg:rgba(110,125,255,0.14);
     --shadow: rgba(0,0,0,0.45);
   }
   html[data-theme="light"]{
@@ -25,6 +26,7 @@
     --ok:#0d8a4d; --ok-bg:rgba(13,138,77,0.1);
     --warn:#a86500; --warn-bg:rgba(168,101,0,0.1);
     --bad:#c62d31; --bad-bg:rgba(198,45,49,0.1);
+    --info:#4753d6; --info-bg:rgba(71,83,214,0.1);
     --shadow: rgba(20,21,28,0.12);
   }
 
@@ -229,6 +231,8 @@
   .status-fulfilled .dot{background:var(--ok);}
   .status-cancelled{background:var(--bad-bg); color:var(--bad);}
   .status-cancelled .dot{background:var(--bad);}
+  .status-verification{background:var(--info-bg); color:var(--info);}
+  .status-verification .dot{background:var(--info);}
 
   .empty-state{text-align:center; padding:3.5rem 1.5rem; color:var(--text-dim);}
   .empty-state svg{width:44px; height:44px; color:var(--text-faint); margin-bottom:1rem;}
@@ -295,6 +299,24 @@
   .modal-items{list-style:none;}
   .modal-items li{display:flex; justify-content:space-between; padding:0.4rem 0; font-size:0.88rem; color:var(--text-dim);}
   .modal-items li span:last-child{color:var(--text); font-weight:600;}
+  .receipt-view{
+    border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--bg-sunken);
+  }
+  .receipt-view img{
+    width:100%; max-height:280px; object-fit:contain; display:block; cursor:zoom-in; background:var(--bg-sunken);
+  }
+  .receipt-view .rv-footer{
+    display:flex; justify-content:space-between; align-items:center; gap:0.6rem;
+    padding:0.55rem 0.8rem; font-size:0.78rem; color:var(--text-faint); border-top:1px solid var(--line);
+  }
+  .receipt-view .rv-footer a{color:var(--accent); text-decoration:none; font-weight:600;}
+  .receipt-view .rv-footer a:hover{text-decoration:underline;}
+  .receipt-ref{
+    display:flex; justify-content:space-between; align-items:center; gap:0.6rem;
+    background:var(--bg-sunken); border:1px solid var(--line); border-radius:9px;
+    padding:0.6rem 0.8rem; font-size:0.86rem; margin-top:0.6rem;
+  }
+  .receipt-ref .rr-value{font-weight:700; font-family:'JetBrains Mono',monospace; color:var(--text);}
 
   .status-select-row{display:flex; gap:0.5rem; flex-wrap:wrap;}
   .status-opt{
@@ -304,6 +326,7 @@
   .status-opt.sel-pending.selected{background:var(--warn-bg); border-color:var(--warn); color:var(--warn);}
   .status-opt.sel-fulfilled.selected{background:var(--ok-bg); border-color:var(--ok); color:var(--ok);}
   .status-opt.sel-cancelled.selected{background:var(--bad-bg); border-color:var(--bad); color:var(--bad);}
+  .status-opt.sel-verification.selected{background:var(--info-bg); border-color:var(--info); color:var(--info);}
 
   .modal-actions{display:flex; gap:0.6rem; margin-top:1.4rem;}
   .modal-actions .btn{flex:1; justify-content:center;}
@@ -499,6 +522,7 @@
                   <input type="text" id="orderSearch" placeholder="Search name, email, or order ID">
                 </div>
                 <div class="chip active" data-status="all">All</div>
+                <div class="chip" data-status="verification">Verification</div>
                 <div class="chip" data-status="pending">Pending</div>
                 <div class="chip" data-status="fulfilled">Fulfilled</div>
                 <div class="chip" data-status="cancelled">Cancelled</div>
@@ -594,6 +618,21 @@
         <ul class="modal-items" id="modalItems"></ul>
       </div>
 
+      <div class="modal-section" id="modalReceiptSection" style="display:none;">
+        <div class="modal-section-label">Bank transfer receipt</div>
+        <div class="receipt-view">
+          <img id="modalReceiptImg" src="" alt="Bank slip receipt" referrerpolicy="no-referrer">
+          <div class="rv-footer">
+            <span>Tap image to enlarge</span>
+            <a id="modalReceiptLink" href="#" target="_blank" rel="noopener">Open in Drive ↗</a>
+          </div>
+        </div>
+        <div class="receipt-ref">
+          <span>Reference number</span>
+          <span class="rr-value" id="modalReceiptRef">—</span>
+        </div>
+      </div>
+
       <div class="modal-section">
         <div class="modal-section-label">Family plan access</div>
         <input type="email" id="modalMemberEmail" placeholder="Email the customer was invited with (e.g. the Netflix/Spotify account email)" style="width:100%; padding:0.6rem 0.8rem; background:var(--bg-sunken); border:1px solid var(--line); color:var(--text); border-radius:9px; font-size:0.88rem;">
@@ -604,6 +643,7 @@
       <div class="modal-section">
         <div class="modal-section-label">Status</div>
         <div class="status-select-row" id="statusSelectRow">
+          <div class="status-opt sel-verification" data-status="verification">Verification</div>
           <div class="status-opt sel-pending" data-status="pending">Pending</div>
           <div class="status-opt sel-fulfilled" data-status="fulfilled">Fulfilled</div>
           <div class="status-opt sel-cancelled" data-status="cancelled">Cancelled</div>
@@ -811,7 +851,7 @@
   });
 
   // ============ Shared database (Google Sheets via Apps Script) ============
-  const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbwi2rFDzQWJkdRp7Sad3qjvCOtyqImJcM0Ed5xmri7LalvozR9EXDDTK79-kboVZoAIfA/exec';
+  const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbxTvbQC4chPSX7peTcs5incqTrYT3HCoVpxPHa5tg9sB0j30YCE1NnRcbR8LTiNiyP9DQ/exec';
   async function apiGet(action, params = {}) {
     const qs = new URLSearchParams({ action, ...params });
     const res = await fetch(`${SHEETS_API_URL}?${qs}`);
@@ -974,13 +1014,14 @@
     const orders = loadOrders();
     const revenue = orders.filter(o => o.status !== 'cancelled').reduce((s,o) => s + o.total, 0);
     const pending = orders.filter(o => o.status === 'pending').length;
+    const needsAttention = orders.filter(o => o.status === 'pending' || o.status === 'verification').length;
     const customers = new Set(orders.map(o => (o.customer && o.customer.email || '').toLowerCase())).size;
 
     document.getElementById('statRevenue').textContent = money(revenue);
     document.getElementById('statOrders').textContent = orders.length;
     document.getElementById('statPending').textContent = pending;
     document.getElementById('statCustomers').textContent = customers;
-    document.getElementById('ordersPendingDot').style.background = pending > 0 ? 'var(--accent)' : 'transparent';
+    document.getElementById('ordersPendingDot').style.background = needsAttention > 0 ? 'var(--accent)' : 'transparent';
 
     // Revenue by service
     const byService = {};
@@ -1054,9 +1095,12 @@
   function orderRowHTML(o, withDate){
     const itemsSummary = (o.items || []).map(it => `${it.name} x${it.quantity}`).join(', ');
     const dateCell = withDate ? `<td style="color:var(--text-faint); font-size:0.82rem;">${formatDate(o.date)}</td>` : '';
+    const receiptIcon = o.receiptUrl
+      ? `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--info)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:0.35rem;vertical-align:-2px;"><path d="M4 3h12l4 4v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M16 3v4h4"/></svg>`
+      : '';
     return `
     <tr data-id="${o.id}">
-      <td class="cell-id">${o.id}</td>
+      <td class="cell-id">${o.id}${receiptIcon}</td>
       ${dateCell}
       <td class="cell-customer">
         <div class="name">${escapeHTML(o.customer ? o.customer.name : '—')}</div>
@@ -1128,6 +1172,16 @@
     document.getElementById('modalMemberEmail').value = order.memberEmail || '';
     document.getElementById('modalMemberEmailError').style.display = 'none';
 
+    const receiptSection = document.getElementById('modalReceiptSection');
+    if (order.receiptUrl) {
+      receiptSection.style.display = 'block';
+      document.getElementById('modalReceiptImg').src = order.receiptUrl;
+      document.getElementById('modalReceiptLink').href = order.receiptUrl;
+      document.getElementById('modalReceiptRef').textContent = order.referenceNumber || '—';
+    } else {
+      receiptSection.style.display = 'none';
+    }
+
     updateStatusOpts();
     orderModal.style.display = 'flex';
   }
@@ -1139,6 +1193,11 @@
   }
   document.querySelectorAll('.status-opt').forEach(opt => {
     opt.addEventListener('click', () => { selectedStatus = opt.dataset.status; updateStatusOpts(); });
+  });
+
+  document.getElementById('modalReceiptImg').addEventListener('click', () => {
+    const link = document.getElementById('modalReceiptLink');
+    if (link && link.href) window.open(link.href, '_blank', 'noopener');
   });
 
   document.getElementById('closeOrderModal').addEventListener('click', () => orderModal.style.display = 'none');
@@ -1438,12 +1497,12 @@
   // ============ CSV export ============
   function exportCSV(){
     const orders = loadOrders();
-    const rows = [['Order ID','Date','Name','Email','Payment','Items','Total (LKR)','Status']];
+    const rows = [['Order ID','Date','Name','Email','Payment','Items','Total (LKR)','Status','Reference Number','Receipt URL']];
     orders.forEach(o => {
       rows.push([
         o.id, o.date, o.customer.name, o.customer.email, o.payment,
         (o.items||[]).map(it => `${it.name} x${it.quantity}`).join('; '),
-        o.total, o.status
+        o.total, o.status, o.referenceNumber || '', o.receiptUrl || ''
       ]);
     });
     const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
