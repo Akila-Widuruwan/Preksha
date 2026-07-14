@@ -72,21 +72,13 @@
     width:100%; padding:0.85rem; border:none; border-radius:10px;
     background:linear-gradient(120deg,var(--accent),var(--accent-2)); color:#fff;
     font-weight:700; font-size:0.95rem; cursor:pointer; transition:filter .2s;
-    display:flex; align-items:center; justify-content:center; gap:0.5rem;
   }
   .login-btn:hover{filter:brightness(1.08);}
-  .login-btn:disabled{cursor:not-allowed; opacity:0.85;}
+  .login-btn{display:flex; align-items:center; justify-content:center; gap:0.5rem;}
+  .login-btn:disabled{filter:none; opacity:0.9;}
   .login-card input:disabled{opacity:0.6;}
   .login-error{color:var(--bad); font-size:0.82rem; margin-top:0.8rem; min-height:1.2em;}
   .login-hint{color:var(--text-faint); font-size:0.76rem; margin-top:1.2rem;}
-
-  .spinner{
-    width:15px; height:15px; border-radius:50%; flex:none;
-    border:2px solid rgba(255,255,255,0.35); border-top-color:#fff;
-    animation:spin .7s linear infinite; display:inline-block;
-  }
-  .spinner.dark{ border-color:rgba(0,0,0,0.18); border-top-color:var(--text-dim); }
-  @keyframes spin{ to{ transform:rotate(360deg); } }
 
   /* ---------- Shell layout ---------- */
   .shell{display:flex; min-height:100vh;}
@@ -212,10 +204,22 @@
   }
   .btn svg{width:14px; height:14px;}
   .btn:hover{border-color:var(--accent); color:var(--accent);}
-  .btn:disabled{opacity:0.6; cursor:not-allowed; pointer-events:none;}
   .btn.primary{background:linear-gradient(120deg,var(--accent),var(--accent-2)); color:#fff; border:none;}
   .btn.primary:hover{filter:brightness(1.08); color:#fff;}
   .btn.danger:hover{border-color:var(--bad); color:var(--bad);}
+  .btn:disabled{cursor:default; pointer-events:none;}
+  .btn.is-busy{cursor:progress; opacity:0.88;}
+  .btn.is-busy:hover{border-color:var(--line); color:inherit; filter:none;}
+  .btn.primary.is-busy:hover{color:#fff;}
+
+  /* Inline button spinner — inherits currentColor so it matches primary,
+     danger, and plain buttons without extra classes. */
+  @keyframes btnSpin{ to{ transform:rotate(360deg); } }
+  .btn-spinner{
+    width:13px; height:13px; flex:none; border-radius:50%;
+    border:2px solid currentColor; border-right-color:transparent; border-top-color:transparent;
+    opacity:0.9; animation:btnSpin .6s linear infinite;
+  }
 
   /* ---------- Table ---------- */
   table{width:100%; border-collapse:collapse; font-size:0.86rem;}
@@ -390,6 +394,7 @@
     .skeleton-text{ animation:none; }
     tbody tr, .admin-product-card{ animation:none; }
     .top-progress{ transition:none; }
+    .btn-spinner{ animation:none; border-right-color:currentColor; }
   }
 </style>
 </head>
@@ -403,7 +408,7 @@
       <h1>Preksha.store</h1>
       <p>Admin dashboard — sign in to continue</p>
       <input type="password" id="loginPasscode" placeholder="Passcode" maxlength="20">
-      <button class="login-btn" id="loginBtn"><span id="loginBtnLabel">Sign in</span></button>
+      <button class="login-btn" id="loginBtn">Sign in</button>
       <div class="login-error" id="loginError"></div>
       <div class="login-hint">Demo passcode: <strong>admin123</strong></div>
     </div>
@@ -662,9 +667,10 @@
         </div>
       </div>
 
+      <div class="login-error" id="orderModalError" style="text-align:left; margin-bottom:0.4rem;"></div>
       <div class="modal-actions">
-        <button class="btn danger" id="deleteOrderBtn"><span id="deleteOrderBtnLabel">Delete</span></button>
-        <button class="btn primary" id="saveOrderBtn"><span id="saveOrderBtnLabel">Save changes</span></button>
+        <button class="btn danger" id="deleteOrderBtn">Delete</button>
+        <button class="btn primary" id="saveOrderBtn">Save changes</button>
       </div>
     </div>
   </div>
@@ -770,6 +776,29 @@
 
   function money(n){ return 'Rs. ' + Math.round(n).toLocaleString('en-US'); }
 
+  // ============ Button loading state ============
+  // Swaps a button into a disabled, spinner + label "busy" state and back,
+  // without disturbing its layout width. Used anywhere an action (sign in,
+  // saving an order, deleting) needs to wait on a network round trip.
+  function setBtnLoading(btn, isLoading, busyLabel){
+    if (!btn) return;
+    if (isLoading) {
+      if (btn.dataset.restoreHtml === undefined) btn.dataset.restoreHtml = btn.innerHTML;
+      btn.style.minWidth = btn.offsetWidth + 'px';
+      btn.disabled = true;
+      btn.classList.add('is-busy');
+      btn.innerHTML = `<span class="btn-spinner"></span><span>${busyLabel || 'Working…'}</span>`;
+    } else {
+      btn.disabled = false;
+      btn.classList.remove('is-busy');
+      if (btn.dataset.restoreHtml !== undefined) {
+        btn.innerHTML = btn.dataset.restoreHtml;
+        delete btn.dataset.restoreHtml;
+      }
+      btn.style.minWidth = '';
+    }
+  }
+
   // ============ Auth ============
   const loginScreen = document.getElementById('loginScreen');
   const appShell = document.getElementById('appShell');
@@ -787,35 +816,31 @@
   document.getElementById('loginBtn').addEventListener('click', tryLogin);
   document.getElementById('loginPasscode').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
 
-  function setLoginLoading(isLoading, label){
-    const loginBtn = document.getElementById('loginBtn');
-    const loginInput = document.getElementById('loginPasscode');
-    const loginLabel = document.getElementById('loginBtnLabel');
-    loginBtn.disabled = isLoading;
-    loginInput.disabled = isLoading;
-    loginLabel.innerHTML = isLoading ? `<span class="spinner"></span>${label}` : 'Sign in';
-  }
-
   async function tryLogin(){
     const val = document.getElementById('loginPasscode').value;
-    const loginError = document.getElementById('loginError');
-    loginError.textContent = '';
-
-    setLoginLoading(true, 'Checking passcode…');
-    const correct = await getPasscode();
-
-    if (val !== correct) {
-      setLoginLoading(false);
-      loginError.textContent = 'Incorrect passcode. Try again.';
-      return;
+    const loginBtn = document.getElementById('loginBtn');
+    const passcodeInput = document.getElementById('loginPasscode');
+    document.getElementById('loginError').textContent = '';
+    setBtnLoading(loginBtn, true, 'Signing in…');
+    passcodeInput.disabled = true;
+    try {
+      const correct = await getPasscode();
+      if (val === correct) {
+        sessionStorage.setItem('prekshaAdminAuthed', '1');
+        loginScreen.style.display = 'none';
+        appShell.style.display = 'flex';
+        init();
+        return;
+      } else {
+        document.getElementById('loginError').textContent = 'Incorrect passcode. Try again.';
+      }
+    } catch (err) {
+      console.error('Login failed:', err);
+      document.getElementById('loginError').textContent = 'Could not reach the server. Try again.';
+    } finally {
+      setBtnLoading(loginBtn, false);
+      passcodeInput.disabled = false;
     }
-
-    sessionStorage.setItem('prekshaAdminAuthed', '1');
-    setLoginLoading(true, 'Loading dashboard…');
-    await init(); // wait for the first orders/products fetch so the dashboard never flashes empty
-    loginScreen.style.display = 'none';
-    appShell.style.display = 'flex';
-    setLoginLoading(false);
   }
 
   document.getElementById('logoutBtn').addEventListener('click', () => {
@@ -1236,55 +1261,51 @@
   document.getElementById('saveOrderBtn').addEventListener('click', async () => {
     const memberEmail = document.getElementById('modalMemberEmail').value.trim();
     const errorEl = document.getElementById('modalMemberEmailError');
+    const modalErrorEl = document.getElementById('orderModalError');
 
     if (selectedStatus === 'fulfilled' && !memberEmail) {
       errorEl.style.display = 'block';
       return;
     }
     errorEl.style.display = 'none';
+    modalErrorEl.textContent = '';
 
     const saveBtn = document.getElementById('saveOrderBtn');
-    const saveLabel = document.getElementById('saveOrderBtnLabel');
     const deleteBtn = document.getElementById('deleteOrderBtn');
-    saveBtn.disabled = true;
+    setBtnLoading(saveBtn, true, 'Saving…');
     deleteBtn.disabled = true;
-    saveLabel.innerHTML = `<span class="spinner"></span>Saving…`;
-
     try {
       await saveOrderStatus(activeOrderId, selectedStatus, memberEmail);
-      await renderAll();
       orderModal.style.display = 'none';
+      renderAll();
     } catch (err) {
-      console.error('saveOrderStatus failed:', err);
-      errorEl.textContent = 'Something went wrong saving this order. Please try again.';
-      errorEl.style.display = 'block';
+      console.error('Failed to save order:', err);
+      modalErrorEl.textContent = 'Could not save — check your connection and try again.';
     } finally {
-      saveBtn.disabled = false;
+      setBtnLoading(saveBtn, false);
       deleteBtn.disabled = false;
-      saveLabel.textContent = 'Save changes';
     }
   });
 
   document.getElementById('deleteOrderBtn').addEventListener('click', async () => {
     if (!confirm('Delete this order permanently?')) return;
+    const modalErrorEl = document.getElementById('orderModalError');
+    modalErrorEl.textContent = '';
 
     const saveBtn = document.getElementById('saveOrderBtn');
     const deleteBtn = document.getElementById('deleteOrderBtn');
-    const deleteLabel = document.getElementById('deleteOrderBtnLabel');
+    setBtnLoading(deleteBtn, true, 'Deleting…');
     saveBtn.disabled = true;
-    deleteBtn.disabled = true;
-    deleteLabel.innerHTML = `<span class="spinner dark"></span>Deleting…`;
-
     try {
       await deleteOrder(activeOrderId);
-      await renderAll();
       orderModal.style.display = 'none';
+      renderAll();
     } catch (err) {
-      console.error('deleteOrder failed:', err);
+      console.error('Failed to delete order:', err);
+      modalErrorEl.textContent = 'Could not delete — check your connection and try again.';
     } finally {
+      setBtnLoading(deleteBtn, false);
       saveBtn.disabled = false;
-      deleteBtn.disabled = false;
-      deleteLabel.textContent = 'Delete';
     }
   });
 
@@ -1503,9 +1524,7 @@
     }
 
     const saveBtn = document.getElementById('saveProductModalBtn');
-    const originalLabel = saveBtn.textContent;
-    saveBtn.disabled = true;
-    saveBtn.textContent = 'Saving…';
+    setBtnLoading(saveBtn, true, 'Saving…');
 
     try {
       if (editingProductId) {
@@ -1549,8 +1568,7 @@
       console.error('Failed to save product:', err);
       document.getElementById('productModalError').textContent = 'Could not save — check your connection and try again.';
     } finally {
-      saveBtn.disabled = false;
-      saveBtn.textContent = originalLabel;
+      setBtnLoading(saveBtn, false);
     }
   });
 
@@ -1614,7 +1632,7 @@
   }
 
   function init(){
-    const firstLoad = renderAll(true);
+    renderAll(true);
 
     // Orders/products live in the shared Google Sheet now, so poll it
     // periodically and on focus to pick up changes from any device.
@@ -1629,8 +1647,6 @@
       btn.style.transition = 'transform .5s';
       setTimeout(() => { btn.style.transform = ''; btn.style.transition = ''; }, 500);
     });
-
-    return firstLoad;
   }
 })();
 </script>
