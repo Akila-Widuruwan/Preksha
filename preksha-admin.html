@@ -216,12 +216,22 @@
   }
   .btn svg{width:14px; height:14px;}
   .btn:hover{border-color:var(--accent); color:var(--accent);}
-  .btn.primary{background:linear-gradient(120deg,var(--accent),var(--accent-2)); color:#fff; border:none;}
-  .btn.primary:hover{filter:brightness(1.08); color:#fff;}
+  .btn.primary{
+    position:relative; background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#fff; border:1px solid rgba(255,255,255,0.08);
+    box-shadow:0 1px 0 rgba(255,255,255,0.16) inset, 0 8px 18px -6px rgba(var(--glow),0.55);
+    letter-spacing:0.01em; transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  }
+  .btn.primary:hover{
+    filter:brightness(1.06); color:#fff; transform:translateY(-1px);
+    box-shadow:0 1px 0 rgba(255,255,255,0.18) inset, 0 12px 22px -6px rgba(var(--glow),0.65);
+  }
+  .btn.primary:active{transform:translateY(0); filter:brightness(0.98);}
   .btn.danger:hover{border-color:var(--bad); color:var(--bad);}
   .btn:disabled{cursor:default; pointer-events:none;}
+  .btn.primary:disabled{background:linear-gradient(135deg,var(--accent),var(--accent-2)); opacity:0.45; box-shadow:none;}
   .btn.is-busy{cursor:progress; opacity:0.88;}
-  .btn.is-busy:hover{border-color:var(--line); color:inherit; filter:none;}
+  .btn.is-busy:hover{border-color:var(--line); color:inherit; filter:none; transform:none;}
   .btn.primary.is-busy:hover{color:#fff;}
 
   /* Inline button spinner — inherits currentColor so it matches primary,
@@ -261,6 +271,83 @@
   .status-cancelled .dot{background:var(--bad);}
   .status-verification{background:var(--info-bg); color:var(--info);}
   .status-verification .dot{background:var(--info);}
+  .status-active{background:var(--ok-bg); color:var(--ok);}
+  .status-active .dot{background:var(--ok);}
+  .status-grace{background:var(--warn-bg); color:var(--warn);}
+  .status-grace .dot{background:var(--warn);}
+  .status-overdue{background:var(--bad-bg); color:var(--bad);}
+  .status-overdue .dot{background:var(--bad); animation:pulseDot 1.6s ease-in-out infinite;}
+  .status-removed{background:var(--bg-sunken); color:var(--text-faint);}
+  .status-removed .dot{background:var(--text-faint);}
+  @keyframes pulseDot{
+    0%, 100%{ box-shadow:0 0 0 0 rgba(229,72,77,0.5); }
+    50%{ box-shadow:0 0 0 4px rgba(229,72,77,0); }
+  }
+
+  /* ---------- Family accounts ---------- */
+  .btn.success:hover{border-color:var(--ok); color:var(--ok);}
+
+  .avatar-chip{
+    width:30px; height:30px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center;
+    font-size:0.74rem; font-weight:800; color:#fff; letter-spacing:0.01em;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  }
+
+  .family-account-card{
+    background:var(--bg-card); border:1px solid var(--line); border-radius:1rem; padding:1.2rem; margin-bottom:1rem;
+    animation:rowIn .35s ease both;
+    transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  }
+  .family-account-card:hover{
+    border-color:var(--line); box-shadow:0 14px 32px var(--shadow); transform:translateY(-2px);
+  }
+  .fac-head{display:flex; align-items:flex-start; gap:0.8rem; flex-wrap:wrap; margin-bottom:0.9rem;}
+  .fac-head .fac-title{font-weight:700; font-size:1rem; line-height:1.3;}
+  .fac-head .fac-sub{color:var(--text-faint); font-size:0.78rem;}
+  .fac-head .fac-actions{margin-left:auto; display:flex; align-items:center; gap:0.5rem;}
+  .fac-seatbar{height:9px; border-radius:50px; background:var(--bg-sunken); overflow:hidden; margin-bottom:0.4rem; position:relative; box-shadow:inset 0 1px 2px rgba(0,0,0,0.25);}
+  .fac-seatbar .fill{
+    height:100%; border-radius:50px; background:linear-gradient(135deg,#00d9ff,#8b5cf6);
+    box-shadow:0 1px 0 rgba(255,255,255,0.2) inset, 0 0 10px rgba(0,217,255,0.45), 0 0 14px rgba(139,92,246,0.4);
+    transition:width .5s cubic-bezier(.4,0,.2,1), background .3s ease, box-shadow .3s ease;
+  }
+  .fac-seatbar .fill.warn{background:linear-gradient(135deg,var(--warn),var(--accent-2)); box-shadow:0 1px 0 rgba(255,255,255,0.18) inset, 0 0 10px rgba(224,168,0,0.4);}
+  .fac-seatbar .fill.full{background:var(--bad); box-shadow:0 1px 0 rgba(255,255,255,0.18) inset, 0 0 10px rgba(229,72,77,0.45);}
+  .fac-seatcount{
+    font-size:0.78rem; color:var(--text-faint); margin-bottom:0.9rem;
+    font-family:'JetBrains Mono',monospace; letter-spacing:0.01em;
+  }
+  .fac-seatcount .fac-seatcount-label{font-family:'Inter',sans-serif; color:var(--text-faint);}
+  .fac-seatcount.full{color:var(--bad);}
+  .fac-members{display:flex; flex-direction:column; gap:0.5rem;}
+  .fac-member-row{
+    display:flex; align-items:center; gap:0.7rem; flex-wrap:wrap; padding:0.6rem 0.8rem;
+    background:var(--bg-sunken); border-radius:9px; font-size:0.84rem;
+    transition:background .15s ease;
+  }
+  .fac-member-row:hover{background:var(--bg-sunken); filter:brightness(1.08);}
+  .fac-member-row .fmr-name{font-weight:600;}
+  .fac-member-row .fmr-email{color:var(--text-faint); font-size:0.78rem;}
+  .fac-member-row .fmr-end{color:var(--text-faint); font-size:0.78rem; margin-left:auto; font-family:'JetBrains Mono',monospace;}
+  .fac-member-row .fmr-actions{display:flex; gap:0.4rem;}
+  .fac-empty{color:var(--text-faint); font-size:0.82rem; padding:0.6rem 0;}
+  .attention-row, .locked-row{
+    display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap; padding:0.75rem 0.9rem;
+    background:var(--bg-sunken); border-radius:9px; font-size:0.84rem; margin-bottom:0.5rem;
+    border-left:3px solid var(--line); animation:rowIn .3s ease both;
+    transition:transform .15s ease, filter .15s ease;
+  }
+  .attention-row:hover, .locked-row:hover{ filter:brightness(1.07); }
+  .attention-row.sev-grace{border-left-color:var(--warn);}
+  .attention-row.sev-overdue{border-left-color:var(--bad);}
+  .locked-row{border-left-color:var(--text-faint);}
+  .attention-row .ar-actions, .locked-row .lr-actions{margin-left:auto; display:flex; gap:0.4rem;}
+  .btn-sm{padding:0.4rem 0.75rem; font-size:0.78rem;}
+  .lookup-history-row{
+    display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap; padding:0.65rem 0.8rem;
+    border-bottom:1px solid var(--line); font-size:0.84rem; animation:rowIn .3s ease both;
+  }
+  .lookup-history-row:last-child{border-bottom:none;}
 
   .empty-state{text-align:center; padding:3.5rem 1.5rem; color:var(--text-dim);}
   .empty-state svg{width:44px; height:44px; color:var(--text-faint); margin-bottom:1rem;}
@@ -303,15 +390,22 @@
   .apc-saved-msg.show{opacity:1;}
 
   /* ---------- Detail modal / drawer ---------- */
+  @keyframes overlayIn{ from{ opacity:0; } to{ opacity:1; } }
+  @keyframes modalIn{
+    from{ opacity:0; transform:translateY(10px) scale(.96); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
   .modal-overlay{
     position:fixed; inset:0; background:rgba(4,5,8,0.65); backdrop-filter:blur(4px);
     display:none; align-items:center; justify-content:center; z-index:300; padding:1rem;
+    animation:overlayIn .16s ease both;
   }
   html[data-theme="light"] .modal-overlay{background:rgba(20,21,28,0.35);}
   .modal{
     background:var(--bg-card); border:1px solid var(--line); border-radius:1.3rem; padding:1.8rem;
     max-width:460px; width:100%; max-height:85vh; overflow-y:auto; position:relative;
     box-shadow:0 40px 80px var(--shadow);
+    animation:modalIn .24s cubic-bezier(.16,1,.3,1) both;
   }
   .modal h3{font-size:1.15rem; margin-bottom:0.2rem;}
   .modal .modal-sub{color:var(--text-faint); font-size:0.8rem; margin-bottom:1.2rem;}
@@ -458,6 +552,9 @@
     tbody tr, .admin-product-card{ animation:none; }
     .top-progress{ transition:none; }
     .btn-spinner{ animation:none; border-right-color:currentColor; }
+    .modal-overlay, .modal, .family-account-card, .attention-row, .locked-row, .lookup-history-row{ animation:none; }
+    .status-overdue .dot{ animation:none; }
+    .fac-account-card:hover, .family-account-card:hover{ transform:none; }
   }
 </style>
 </head>
@@ -503,6 +600,14 @@
         <div class="nav-item" data-page="products">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>
           Products
+        </div>
+        <div class="nav-item" data-page="users">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Users
+        </div>
+        <div class="nav-item" data-page="family">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg>
+          Family Plans <span class="nav-dot" id="familyAttentionDot"></span>
         </div>
       </div>
 
@@ -568,6 +673,11 @@
               <div class="stat-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Unique customers</div>
               <div class="stat-value" id="statCustomers">0</div>
               <div class="stat-delta flat">By email</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Registered users</div>
+              <div class="stat-value" id="statUsers">0</div>
+              <div class="stat-delta flat" data-nav="users" style="cursor:pointer;">Manage users →</div>
             </div>
           </div>
 
@@ -653,6 +763,74 @@
               <div class="admin-products-grid" id="productsGrid"></div>
             </div>
           </div>
+        </div>
+
+        <!-- ===== Users page ===== -->
+        <div class="page" id="page-users" style="display:none;">
+          <div class="panel">
+            <div class="panel-head">
+              <div class="filter-row">
+                <div class="search-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input type="text" id="userSearch" placeholder="Search name or email">
+                </div>
+              </div>
+              <div class="topbar-sub" id="usersCountSub">0 registered users</div>
+            </div>
+            <div style="overflow-x:auto;">
+              <table>
+                <thead><tr><th>Name</th><th>Email</th><th>Sign-in method</th><th></th></tr></thead>
+                <tbody id="usersTableBody"></tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="usersEmpty" style="display:none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <h4>No registered users yet</h4>
+              <p>Accounts created on the storefront (sign-up or Google sign-in) will show up here.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Family Plans page ===== -->
+        <div class="page" id="page-family" style="display:none;">
+
+          <div class="panel">
+            <div class="panel-head">
+              <div class="search-box" style="max-width:340px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="customerLookupInput" placeholder="Look up a customer by email">
+              </div>
+            </div>
+            <div class="panel-body" id="customerLookupResult" style="display:none;"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Needs attention</h3>
+              <div class="topbar-sub">Renewals due, in grace, or overdue past 3 days</div>
+            </div>
+            <div class="panel-body" id="familyAttentionBody"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Locked customers</h3>
+              <div class="topbar-sub">Removed customers still locked out of joining a different account</div>
+            </div>
+            <div class="panel-body" id="familyLockedBody"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Family accounts</h3>
+              <button class="btn primary" id="addFamilyAccountBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add account
+              </button>
+            </div>
+            <div class="panel-body" id="familyAccountsBody"></div>
+          </div>
+
         </div>
 
         <!-- ===== Settings page ===== -->
@@ -756,6 +934,78 @@
     </div>
   </div>
 
+  <!-- ===== Family account modal (add/edit a shared account) ===== -->
+  <div class="modal-overlay" id="familyAccountModal">
+    <div class="modal">
+      <button class="modal-close" id="closeFamilyAccountModal">&times;</button>
+      <h3 id="familyAccountModalTitle">Add family account</h3>
+      <div class="modal-sub">A shared account you own — e.g. one YouTube family group</div>
+
+      <div class="modal-section">
+        <div class="modal-section-label">Service</div>
+        <select id="famAccService" style="width:100%; padding:0.6rem 0.8rem; background:var(--bg-sunken); border:1px solid var(--line); color:var(--text); border-radius:9px; font-size:0.88rem;"></select>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Label</div>
+        <input type="text" id="famAccLabel" placeholder="e.g. YouTube Fam #3" style="width:100%; padding:0.6rem 0.8rem; background:var(--bg-sunken); border:1px solid var(--line); color:var(--text); border-radius:9px; font-size:0.88rem;">
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Login email</div>
+        <input type="text" id="famAccLoginEmail" placeholder="Account login email" style="width:100%; padding:0.6rem 0.8rem; background:var(--bg-sunken); border:1px solid var(--line); color:var(--text); border-radius:9px; font-size:0.88rem;">
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Capacity (seats)</div>
+        <input type="number" id="famAccCapacity" min="1" value="5" style="width:100%; padding:0.6rem 0.8rem; background:var(--bg-sunken); border:1px solid var(--line); color:var(--text); border-radius:9px; font-size:0.88rem;">
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Notes (optional)</div>
+        <input type="text" id="famAccNotes" placeholder="Anything worth remembering about this account" style="width:100%; padding:0.6rem 0.8rem; background:var(--bg-sunken); border:1px solid var(--line); color:var(--text); border-radius:9px; font-size:0.88rem;">
+      </div>
+
+      <div class="login-error" id="familyAccountModalError" style="text-align:left; margin-bottom:0.4rem;"></div>
+      <div class="modal-actions">
+        <button class="btn danger" id="deleteFamilyAccountBtn" style="display:none;">Delete account</button>
+        <button class="btn primary" id="saveFamilyAccountBtn">Save account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Assign-to-slot modal (creates a Membership row) ===== -->
+  <div class="modal-overlay" id="assignMembershipModal">
+    <div class="modal">
+      <button class="modal-close" id="closeAssignMembershipModal">&times;</button>
+      <h3>Assign to a seat</h3>
+      <div class="modal-sub" id="assignMembershipAccountLabel">—</div>
+
+      <div class="modal-section">
+        <div class="modal-section-label">Customer name</div>
+        <input type="text" id="assignCustomerName" style="width:100%; padding:0.6rem 0.8rem; background:var(--bg-sunken); border:1px solid var(--line); color:var(--text); border-radius:9px; font-size:0.88rem;">
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Customer email</div>
+        <input type="email" id="assignCustomerEmail" style="width:100%; padding:0.6rem 0.8rem; background:var(--bg-sunken); border:1px solid var(--line); color:var(--text); border-radius:9px; font-size:0.88rem;">
+        <div id="assignLockWarning" style="display:none; margin-top:0.6rem; padding:0.7rem 0.9rem; border-radius:9px; background:var(--bad-bg); color:var(--bad); font-size:0.82rem;"></div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Plan length</div>
+        <select id="assignDuration" style="width:100%; padding:0.6rem 0.8rem; background:var(--bg-sunken); border:1px solid var(--line); color:var(--text); border-radius:9px; font-size:0.88rem;">
+          <option value="1">1 month</option>
+          <option value="3">3 months</option>
+          <option value="6">6 months</option>
+        </select>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Start date</div>
+        <input type="date" id="assignStartDate" style="width:100%; padding:0.6rem 0.8rem; background:var(--bg-sunken); border:1px solid var(--line); color:var(--text); border-radius:9px; font-size:0.88rem;">
+      </div>
+
+      <div class="login-error" id="assignMembershipModalError" style="text-align:left; margin-bottom:0.4rem;"></div>
+      <div class="modal-actions">
+        <button class="btn primary" id="saveAssignMembershipBtn" style="width:100%; justify-content:center;">Add to seat</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== Receipt lightbox — in-page pop-up for viewing the bank slip full size ===== -->
   <div class="receipt-lightbox" id="receiptLightbox">
     <div class="receipt-lightbox-frame">
@@ -832,6 +1082,44 @@
     </div>
   </div>
 
+  <!-- ===== Edit user modal ===== -->
+  <div class="modal-overlay" id="userModal">
+    <div class="modal">
+      <button class="modal-close" id="closeUserModal">&times;</button>
+      <h3>Edit user</h3>
+      <div class="modal-sub">Changes save directly to the Users sheet.</div>
+
+      <div class="modal-section">
+        <div class="modal-section-label">Name</div>
+        <input type="text" id="euName" placeholder="Full name" style="width:100%; padding:0.6rem 0.8rem; background:var(--bg-sunken); border:1px solid var(--line); color:var(--text); border-radius:9px; font-size:0.88rem;">
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Email</div>
+        <input type="email" id="euEmail" placeholder="name@example.com" style="width:100%; padding:0.6rem 0.8rem; background:var(--bg-sunken); border:1px solid var(--line); color:var(--text); border-radius:9px; font-size:0.88rem;">
+        <div style="font-size:0.76rem; color:var(--text-faint); margin-top:0.4rem;">The customer signs in with this address — changing it changes their login.</div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Sign-in method</div>
+        <input type="text" id="euProvider" placeholder="e.g. password or google" style="width:100%; padding:0.6rem 0.8rem; background:var(--bg-sunken); border:1px solid var(--line); color:var(--text); border-radius:9px; font-size:0.88rem;">
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Photo URL — optional</div>
+        <input type="text" id="euPhotoUrl" placeholder="https://…" style="width:100%; padding:0.6rem 0.8rem; background:var(--bg-sunken); border:1px solid var(--line); color:var(--text); border-radius:9px; font-size:0.88rem;">
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Reset password — optional</div>
+        <input type="password" id="euNewPassword" placeholder="Leave blank to keep their current password" style="width:100%; padding:0.6rem 0.8rem; background:var(--bg-sunken); border:1px solid var(--line); color:var(--text); border-radius:9px; font-size:0.88rem;">
+        <div style="font-size:0.76rem; color:var(--text-faint); margin-top:0.4rem;">Only applies to accounts that sign in with a password — not Google sign-in.</div>
+      </div>
+
+      <div class="login-error" id="userModalError"></div>
+      <div class="modal-actions">
+        <button class="btn danger" id="deleteUserBtn">Delete</button>
+        <button class="btn primary" id="saveUserBtn">Save changes</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 (function(){
   // ============ Brand badges (shared visual language with storefront) ============
@@ -841,7 +1129,11 @@
     'amazon-prime': `<svg viewBox="0 0 24 24" fill="none"><path d="M4 15.5c4.5 3 11.5 3 16 0" stroke="#0a0b10" stroke-width="2" stroke-linecap="round"/><path d="M17.5 14.5c1.2-.2 2.6.2 2.5 1-.1 1-1.7 2-3 2.2" stroke="#0a0b10" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 10V6.5A2.5 2.5 0 0 1 10.5 4h3A2.5 2.5 0 0 1 16 6.5V10" stroke="#0a0b10" stroke-width="2" stroke-linecap="round"/></svg>`,
     'disney-plus': `<svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M4 12h16" stroke="#fff" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/><path d="M12 5 13.6 9.7 18.5 9.7 14.6 12.6 16.1 17.3 12 14.4 7.9 17.3 9.4 12.6 5.5 9.7 10.4 9.7Z" fill="#fff"/></svg>`,
     'youtube-premium': `<svg viewBox="0 0 24 24" fill="none"><path d="M9.5 8.3v7.4l6.5-3.7z" fill="#fff"/></svg>`,
-    'preksha-iptv': `<svg viewBox="0 0 24 24"><text x="12" y="17" text-anchor="middle" font-family="Outfit,sans-serif" font-weight="900" font-size="14" fill="#0a0b10">P</text></svg>`
+    'preksha-iptv': `<svg viewBox="0 0 24 24"><text x="12" y="17" text-anchor="middle" font-family="Outfit,sans-serif" font-weight="900" font-size="14" fill="#0a0b10">P</text></svg>`,
+    'spotify-family-3m': `<svg viewBox="0 0 24 24" fill="none"><path d="M4 10.5c4.5-1.4 10-1 14 1.3M4.8 14c3.6-1 7.9-.7 11 1.2M5.6 17.4c2.9-.7 6.2-.5 8.7.9" stroke="#0a0b10" stroke-width="2" stroke-linecap="round"/></svg>`,
+    'spotify-family-6m': `<svg viewBox="0 0 24 24" fill="none"><path d="M4 10.5c4.5-1.4 10-1 14 1.3M4.8 14c3.6-1 7.9-.7 11 1.2M5.6 17.4c2.9-.7 6.2-.5 8.7.9" stroke="#0a0b10" stroke-width="2" stroke-linecap="round"/></svg>`,
+    'youtube-premium-3m': `<svg viewBox="0 0 24 24" fill="none"><path d="M9.5 8.3v7.4l6.5-3.7z" fill="#fff"/></svg>`,
+    'youtube-premium-6m': `<svg viewBox="0 0 24 24" fill="none"><path d="M9.5 8.3v7.4l6.5-3.7z" fill="#fff"/></svg>`
   };
   const brandStyle = {
     'spotify-family': {bg:'linear-gradient(135deg,#1DB954,#17a548)', color:'#1DB954'},
@@ -849,12 +1141,22 @@
     'amazon-prime': {bg:'linear-gradient(135deg,#00A8E1,#0087b8)', color:'#00A8E1'},
     'disney-plus': {bg:'linear-gradient(135deg,#6E7DFF,#113CCF)', color:'#6E7DFF'},
     'youtube-premium': {bg:'linear-gradient(135deg,#FF0000,#c40000)', color:'#FF0000'},
-    'preksha-iptv': {bg:'linear-gradient(135deg,#ff3d6e,#ffb020)', color:'#ff3d6e'}
+    'preksha-iptv': {bg:'linear-gradient(135deg,#ff3d6e,#ffb020)', color:'#ff3d6e'},
+    'spotify-family-3m': {bg:'linear-gradient(135deg,#1DB954,#17a548)', color:'#1DB954'},
+    'spotify-family-6m': {bg:'linear-gradient(135deg,#1DB954,#17a548)', color:'#1DB954'},
+    'youtube-premium-3m': {bg:'linear-gradient(135deg,#FF0000,#c40000)', color:'#FF0000'},
+    'youtube-premium-6m': {bg:'linear-gradient(135deg,#FF0000,#c40000)', color:'#FF0000'}
   };
   const defaultProducts = [
     { id:'spotify-family', price:1490, original:3590, active:true,
       en:{ name:'Spotify Premium', tag:'Music', desc:'Full Premium access via a shared family plan slot' },
       si:{ name:'Spotify Premium', tag:'සංගීතය', desc:'බෙදාගත් family plan ස්ථානයක් හරහා සම්පූර්ණ Premium ප්‍රවේශය' } },
+    { id:'spotify-family-3m', price:1500, original:10770, active:true,
+      en:{ name:'Spotify Premium — 3 Months', tag:'Music · 3 Months', desc:'Full Premium access via a shared family plan slot, paid upfront for 3 months' },
+      si:{ name:'Spotify Premium — මාස 3', tag:'සංගීතය · මාස 3', desc:'මාස 3ක් සඳහා කලින් ගෙවා, බෙදාගත් family plan ස්ථානයක් හරහා සම්පූර්ණ Premium ප්‍රවේශය' } },
+    { id:'spotify-family-6m', price:1500, original:21540, active:true,
+      en:{ name:'Spotify Premium — 6 Months', tag:'Music · 6 Months', desc:'Full Premium access via a shared family plan slot, paid upfront for 6 months' },
+      si:{ name:'Spotify Premium — මාස 6', tag:'සංගීතය · මාස 6', desc:'මාස 6ක් සඳහා කලින් ගෙවා, බෙදාගත් family plan ස්ථානයක් හරහා සම්පූර්ණ Premium ප්‍රවේශය' } },
     { id:'netflix-standard', price:1790, original:4650, active:true,
       en:{ name:'Netflix Standard', tag:'Streaming', desc:'1 screen on a Standard HD household plan' },
       si:{ name:'Netflix Standard', tag:'ප්‍රවාහය', desc:'Standard HD ගෘහ සැලැස්මක තිරයක්' } },
@@ -867,6 +1169,12 @@
     { id:'youtube-premium', price:890, original:3890, active:true,
       en:{ name:'YouTube Premium', tag:'Ad-free + Music', desc:'1 member slot, ad-free video & YouTube Music' },
       si:{ name:'YouTube Premium', tag:'දැන්වීම් රහිත + සංගීතය', desc:'දැන්වීම් රහිත වීඩියෝ සහ YouTube Music සමඟ සාමාජික ස්ථානයක්' } },
+    { id:'youtube-premium-3m', price:1200, original:11670, active:true,
+      en:{ name:'YouTube Premium — 3 Months', tag:'Ad-free + Music · 3 Months', desc:'1 member slot, ad-free video & YouTube Music, paid upfront for 3 months' },
+      si:{ name:'YouTube Premium — මාස 3', tag:'දැන්වීම් රහිත + සංගීතය · මාස 3', desc:'මාස 3ක් සඳහා කලින් ගෙවා, දැන්වීම් රහිත වීඩියෝ සහ YouTube Music සමඟ සාමාජික ස්ථානයක්' } },
+    { id:'youtube-premium-6m', price:2250, original:23340, active:true,
+      en:{ name:'YouTube Premium — 6 Months', tag:'Ad-free + Music · 6 Months', desc:'1 member slot, ad-free video & YouTube Music, paid upfront for 6 months' },
+      si:{ name:'YouTube Premium — මාස 6', tag:'දැන්වීම් රහිත + සංගීතය · මාස 6', desc:'මාස 6ක් සඳහා කලින් ගෙවා, දැන්වීම් රහිත වීඩියෝ සහ YouTube Music සමඟ සාමාජික ස්ථානයක්' } },
     { id:'preksha-iptv', price:1500, original:4990, active:true,
       en:{ name:'Preksha Premium IPTV Subscription', tag:'IPTV', desc:'Full premium IPTV access, shared at member pricing' },
       si:{ name:'Preksha Premium IPTV Subscription', tag:'IPTV', desc:'සම්පූර්ණ වාරික IPTV ප්‍රවේශය, සාමාජික මිලකට' } }
@@ -977,6 +1285,8 @@
     dashboard:{title:'Dashboard', sub:'Overview of orders and revenue'},
     orders:{title:'Orders', sub:'All incoming subscription slot orders'},
     products:{title:'Products', sub:'Manage plan pricing and availability'},
+    users:{title:'Users', sub:'Registered storefront accounts'},
+    family:{title:'Family Plans', sub:'Shared account seats, renewals & customer history'},
     settings:{title:'Settings', sub:'Dashboard preferences and data controls'}
   };
 
@@ -991,6 +1301,8 @@
     // Show the latest data the moment the admin navigates to Products,
     // even though background polling no longer auto-refreshes this page.
     if (name === 'products') renderProductsPage();
+    if (name === 'users') renderUsersPage();
+    if (name === 'family') renderFamilyPage();
   }
   let currentPage = 'dashboard';
   document.querySelectorAll('.nav-item').forEach(item => {
@@ -1016,12 +1328,12 @@
     return json.data;
   }
 
-  // Note: the "plan activated" email is sent from Code.gs (the Apps Script
-  // backend) via Gmail's free MailApp service, not from here. It fires
-  // automatically the moment updateOrderStatus flips an order to
-  // "fulfilled" — see sendPlanActivatedEmail() in Code.gs. This keeps
-  // EmailJS's free-tier 2-template limit free for the OTP and thank-you
-  // emails on the storefront.
+  // Note: all order/account emails — "plan activated", the order thank-you,
+  // and the signup/reset OTP — are sent from Code.gs (the Apps Script
+  // backend) via Gmail's free MailApp service, not from here or the
+  // storefront. EmailJS is no longer used anywhere in this project. The
+  // "plan activated" email fires automatically the moment updateOrderStatus
+  // flips an order to "fulfilled" — see sendPlanActivatedEmail() in Code.gs.
 
   // ============ Data access ============
   // Data is fetched from Sheets into these caches by refreshCache(), then all
@@ -1030,6 +1342,9 @@
   let ordersCache = [];
   let productOverridesCache = {};
   let customProductsCache = [];
+  let usersCache = [];
+  let familyAccountsCache = [];
+  let membershipsCache = [];
 
   const topProgress = document.getElementById('topProgress');
   function showTopLoader() {
@@ -1051,7 +1366,7 @@
   // Shown only on the very first load after login, so the dashboard is never
   // just a blank screen while the initial Sheet fetch is in flight.
   function showSkeletons() {
-    ['statRevenue', 'statOrders', 'statPending', 'statCustomers'].forEach(id => {
+    ['statRevenue', 'statOrders', 'statPending', 'statCustomers', 'statUsers'].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
       el.classList.add('is-loading');
@@ -1082,12 +1397,16 @@
   async function doRefreshCache(){
     showTopLoader();
     try {
-      const [orders, overrides, custom] = await Promise.all([
-        apiGet('getOrders'), apiGet('getProducts'), apiGet('getCustomProducts')
+      const [orders, overrides, custom, users, familyAccounts, memberships] = await Promise.all([
+        apiGet('getOrders'), apiGet('getProducts'), apiGet('getCustomProducts'), apiGet('getUsers'),
+        apiGet('getFamilyAccounts'), apiGet('getMemberships')
       ]);
       ordersCache = orders;
       productOverridesCache = overrides;
       customProductsCache = custom;
+      usersCache = users;
+      familyAccountsCache = familyAccounts;
+      membershipsCache = memberships;
     } catch (err) {
       console.error('refreshCache failed:', err);
     } finally {
@@ -1108,6 +1427,523 @@
     await apiPost('clearAllOrders', {});
     await refreshCache();
   }
+
+  function loadUsers(){ return usersCache; }
+  async function saveUserAdmin(originalEmail, data){
+    await apiPost('adminUpdateUser', { originalEmail, ...data });
+    await refreshCache();
+  }
+  async function deleteUserAdmin(email){
+    await apiPost('deleteUser', { email });
+    await refreshCache();
+  }
+  async function hashPassword(password) {
+    const data = new TextEncoder().encode(password);
+    const buf = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // ============ Family plan slot tracking ============
+  // See the "Family Plan slot tracking" comment block in Code.gs for the
+  // sheet layout. The core idea: FamilyAccounts is the shared account
+  // itself (capacity, login), Memberships is one row per customer's stay
+  // in it. A customer can have many membership rows over time — that's
+  // how their full history survives being removed and coming back later.
+  const GRACE_DAYS = 3;      // days after endDate before a seat is flagged "overdue"
+  const LOCK_MONTHS = 12;    // platform rule: once removed, locked out of *other* accounts this long
+
+  function loadFamilyAccounts(){ return familyAccountsCache; }
+  function loadMemberships(){ return membershipsCache; }
+
+  async function saveFamilyAccount(data){
+    await apiPost('saveFamilyAccount', data);
+    await refreshCache();
+  }
+  async function deleteFamilyAccount(id){
+    await apiPost('deleteFamilyAccount', { id });
+    await refreshCache();
+  }
+  async function addMembership(data){
+    await apiPost('addMembership', data);
+    await refreshCache();
+  }
+  async function renewMembership(id, endDate){
+    await apiPost('renewMembership', { id, endDate });
+    await refreshCache();
+  }
+  async function removeMembership(id, lockUntil){
+    await apiPost('removeMembership', { id, lockUntil });
+    await refreshCache();
+  }
+  async function deleteMembership(id){
+    await apiPost('deleteMembership', { id });
+    await refreshCache();
+  }
+
+  function addMonths(date, months){
+    const d = new Date(date);
+    d.setMonth(d.getMonth() + months);
+    return d;
+  }
+  function isoDate(d){ return new Date(d).toISOString().slice(0, 10); }
+  function daysBetween(a, b){ return Math.round((new Date(a) - new Date(b)) / 86400000); }
+
+  // Reads the plan duration (in months) straight off the product id, since
+  // that's how durations are encoded across the storefront (e.g.
+  // 'youtube-premium-3m' = 3 months, 'youtube-premium' = 1 month).
+  function durationMonthsFor(serviceId){
+    if (/-6m$/.test(serviceId)) return 6;
+    if (/-3m$/.test(serviceId)) return 3;
+    return 1;
+  }
+
+  // Derives a membership's *live* status from dates rather than trusting a
+  // stored value, so nothing needs a cron job to stay accurate:
+  //  - 'removed'  → admin explicitly removed them (real, stored state)
+  //  - 'active'   → today is on/before endDate
+  //  - 'grace'    → up to GRACE_DAYS past endDate, not yet acted on
+  //  - 'overdue'  → past the grace window, needs the admin to renew or remove
+  function membershipLiveStatus(m){
+    if (m.status === 'removed') return 'removed';
+    const today = isoDate(new Date());
+    const diff = daysBetween(today, m.endDate);
+    if (diff <= 0) return 'active';
+    if (diff <= GRACE_DAYS) return 'grace';
+    return 'overdue';
+  }
+
+  // Is this customer currently locked out of joining a *different* account
+  // for this service? Returns the blocking membership row, or null.
+  function findActiveLock(customerEmail, serviceId, excludeAccountId){
+    const email = String(customerEmail || '').toLowerCase().trim();
+    const today = isoDate(new Date());
+    return loadMemberships().find(m =>
+      m.status === 'removed' &&
+      String(m.customerEmail).toLowerCase() === email &&
+      m.serviceId === serviceId &&
+      m.lockUntil && m.lockUntil > today &&
+      m.accountId !== excludeAccountId
+    ) || null;
+  }
+
+  function accountSeatCount(accountId){
+    return loadMemberships().filter(m => m.accountId === accountId && membershipLiveStatus(m) !== 'removed').length;
+  }
+
+  // A membership's serviceId is stored *without* the duration suffix (e.g.
+  // 'youtube-premium', not 'youtube-premium-3m') — the real shared account
+  // is the same regardless of which length plan a member paid for. Plan
+  // length only affects that member's own endDate.
+  function baseServiceId(id){ return String(id || '').replace(/-(3m|6m)$/, ''); }
+
+  const FAMILY_SERVICE_OPTIONS = [
+    { id: 'youtube-premium', label: 'YouTube Premium' },
+    { id: 'spotify-family', label: 'Spotify Premium' },
+    { id: 'netflix-standard', label: 'Netflix Standard' },
+    { id: 'amazon-prime', label: 'Amazon Prime' },
+    { id: 'disney-plus', label: 'Disney+' },
+    { id: 'preksha-iptv', label: 'Preksha Premium IPTV' }
+  ];
+  function familyServiceLabel(serviceId){
+    const opt = FAMILY_SERVICE_OPTIONS.find(o => o.id === serviceId);
+    if (opt) return opt.label;
+    const custom = loadCustomProducts().find(p => baseServiceId(p.id) === serviceId);
+    return custom ? custom.en.name : serviceId;
+  }
+
+  function initialsFor(name, email){
+    const src = (name && name.trim()) || email || '?';
+    const parts = src.trim().split(/\s+/);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return src.slice(0, 2).toUpperCase();
+  }
+  const ICON_RENEW = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
+  const ICON_REMOVE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="8"/></svg>`;
+  const ICON_EDIT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+  const ICON_ADD_MEMBER = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>`;
+
+  function familyStatusBadge(status){
+    const labels = { active:'Active', grace:'Grace period', overdue:'Overdue', removed:'Removed' };
+    return `<span class="status-badge status-${status}"><span class="dot"></span>${labels[status] || status}</span>`;
+  }
+
+  // ---------- Render: Family Plans page ----------
+  function renderFamilyPage(){
+    populateFamAccServiceOptions();
+    renderFamilyAttention();
+    renderFamilyLocked();
+    renderFamilyAccounts();
+    updateFamilyAttentionDot();
+  }
+
+  function updateFamilyAttentionDot(){
+    const memberships = loadMemberships();
+    const needsAttention = memberships.some(m => {
+      const s = membershipLiveStatus(m);
+      return s === 'grace' || s === 'overdue';
+    });
+    const dot = document.getElementById('familyAttentionDot');
+    if (dot) dot.style.background = needsAttention ? 'var(--bad)' : 'transparent';
+  }
+
+  function populateFamAccServiceOptions(){
+    const select = document.getElementById('famAccService');
+    if (!select || select.dataset.populated) return;
+    select.innerHTML = FAMILY_SERVICE_OPTIONS.map(o => `<option value="${o.id}">${o.label}</option>`).join('');
+    select.dataset.populated = '1';
+  }
+
+  function renderFamilyAttention(){
+    const body = document.getElementById('familyAttentionBody');
+    if (!body) return;
+    const memberships = loadMemberships();
+    const accounts = loadFamilyAccounts();
+    const needing = memberships
+      .map(m => ({ m, status: membershipLiveStatus(m) }))
+      .filter(x => x.status === 'grace' || x.status === 'overdue')
+      .sort((a, b) => new Date(a.m.endDate) - new Date(b.m.endDate));
+
+    if (needing.length === 0) {
+      body.innerHTML = `<div class="fac-empty">Nothing needs attention right now.</div>`;
+      return;
+    }
+    body.innerHTML = needing.map(({ m, status }, i) => {
+      const account = accounts.find(a => a.id === m.accountId);
+      const label = account ? account.label : m.serviceId;
+      return `
+      <div class="attention-row sev-${status}" style="animation-delay:${i * 30}ms">
+        <div class="avatar-chip">${initialsFor(m.customerName, m.customerEmail)}</div>
+        <div>
+          <div class="fmr-name">${m.customerName || '(no name)'} <span class="fmr-email">${m.customerEmail}</span></div>
+          <div style="color:var(--text-faint); font-size:0.78rem;">${familyServiceLabel(m.serviceId)} — ${label} · ended ${m.endDate}</div>
+        </div>
+        ${familyStatusBadge(status)}
+        <div class="ar-actions">
+          <button class="btn btn-sm success" data-renew="${m.id}">${ICON_RENEW}Renew</button>
+          <button class="btn btn-sm danger" data-remove="${m.id}">${ICON_REMOVE}Remove &amp; lock</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    body.querySelectorAll('[data-renew]').forEach(btn => {
+      btn.addEventListener('click', () => quickRenew(btn.dataset.renew));
+    });
+    body.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.addEventListener('click', () => quickRemove(btn.dataset.remove));
+    });
+  }
+
+  async function quickRenew(membershipId){
+    const m = loadMemberships().find(x => x.id === membershipId);
+    if (!m) return;
+    const months = prompt('Renew for how many months? (1, 3, or 6)', '1');
+    if (!months) return;
+    const n = parseInt(months, 10);
+    if (![1,3,6].includes(n)) { alert('Please enter 1, 3, or 6.'); return; }
+    const base = new Date() > new Date(m.endDate) ? new Date() : new Date(m.endDate);
+    const newEnd = isoDate(addMonths(base, n));
+    try {
+      await renewMembership(membershipId, newEnd);
+      renderFamilyPage();
+    } catch (err) {
+      alert('Could not renew: ' + err.message);
+    }
+  }
+
+  async function quickRemove(membershipId){
+    const m = loadMemberships().find(x => x.id === membershipId);
+    if (!m) return;
+    const ok = confirm(`Remove ${m.customerName || m.customerEmail} from this account? They'll be locked out of joining any *other* ${familyServiceLabel(m.serviceId)} account for ${LOCK_MONTHS} months — only this same account will be open to them again once it has room.`);
+    if (!ok) return;
+    const lockUntil = isoDate(addMonths(new Date(), LOCK_MONTHS));
+    try {
+      await removeMembership(membershipId, lockUntil);
+      renderFamilyPage();
+    } catch (err) {
+      alert('Could not remove: ' + err.message);
+    }
+  }
+
+  function renderFamilyLocked(){
+    const body = document.getElementById('familyLockedBody');
+    if (!body) return;
+    const today = isoDate(new Date());
+    const accounts = loadFamilyAccounts();
+    const locked = loadMemberships()
+      .filter(m => m.status === 'removed' && m.lockUntil && m.lockUntil > today)
+      .sort((a, b) => new Date(a.lockUntil) - new Date(b.lockUntil));
+
+    if (locked.length === 0) {
+      body.innerHTML = `<div class="fac-empty">No one is currently locked out.</div>`;
+      return;
+    }
+    body.innerHTML = locked.map((m, i) => {
+      const account = accounts.find(a => a.id === m.accountId);
+      const label = account ? account.label : m.serviceId;
+      const seatsFree = account ? account.capacity - accountSeatCount(account.id) : 0;
+      return `
+      <div class="locked-row" style="animation-delay:${i * 30}ms">
+        <div class="avatar-chip" style="background:var(--text-faint);">${initialsFor(m.customerName, m.customerEmail)}</div>
+        <div>
+          <div class="fmr-name">${m.customerName || '(no name)'} <span class="fmr-email">${m.customerEmail}</span></div>
+          <div style="color:var(--text-faint); font-size:0.78rem;">
+            Locked to <strong>${label}</strong> only, until ${m.lockUntil}
+            ${seatsFree > 0 ? ` · ${seatsFree} seat(s) open there now` : ' · that account is currently full'}
+          </div>
+        </div>
+        ${account && seatsFree > 0 ? `<button class="btn btn-sm primary lr-actions" data-rejoin="${m.id}">${ICON_ADD_MEMBER}Re-add to ${label}</button>` : ''}
+      </div>`;
+    }).join('');
+
+    body.querySelectorAll('[data-rejoin]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const m = loadMemberships().find(x => x.id === btn.dataset.rejoin);
+        if (m) openAssignMembershipModal(m.accountId, { customerName: m.customerName, customerEmail: m.customerEmail });
+      });
+    });
+  }
+
+  function renderFamilyAccounts(){
+    const body = document.getElementById('familyAccountsBody');
+    if (!body) return;
+    const accounts = loadFamilyAccounts();
+    if (accounts.length === 0) {
+      body.innerHTML = `<div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg>
+        <h4>No family accounts yet</h4>
+        <p>Add the shared accounts you own so you can track seats, expiries, and history per customer.</p>
+      </div>`;
+      return;
+    }
+    const memberships = loadMemberships();
+    body.innerHTML = accounts.map((acc, cardIdx) => {
+      const members = memberships.filter(m => m.accountId === acc.id && membershipLiveStatus(m) !== 'removed');
+      const filled = members.length;
+      const pct = Math.min(100, Math.round((filled / (acc.capacity || 1)) * 100));
+      const full = filled >= acc.capacity;
+      const almostFull = !full && pct >= 80;
+      const fillClass = full ? 'full' : (almostFull ? 'warn' : '');
+      const rows = members.length === 0
+        ? `<div class="fac-empty">No members yet.</div>`
+        : members.map(m => {
+            const status = membershipLiveStatus(m);
+            return `
+            <div class="fac-member-row">
+              <div class="avatar-chip">${initialsFor(m.customerName, m.customerEmail)}</div>
+              <div>
+                <span class="fmr-name">${m.customerName || '(no name)'}</span>
+                <span class="fmr-email">${m.customerEmail}</span>
+              </div>
+              ${familyStatusBadge(status)}
+              <span class="fmr-end">ends ${m.endDate}</span>
+              <div class="fmr-actions">
+                <button class="btn btn-sm success" data-renew="${m.id}">${ICON_RENEW}Renew</button>
+                <button class="btn btn-sm danger" data-remove="${m.id}">${ICON_REMOVE}Remove</button>
+              </div>
+            </div>`;
+          }).join('');
+      return `
+      <div class="family-account-card" style="animation-delay:${cardIdx * 40}ms">
+        <div class="fac-head">
+          <div>
+            <div class="fac-title">${acc.label}</div>
+            <div class="fac-sub">${familyServiceLabel(acc.serviceId)}${acc.loginEmail ? ' · ' + acc.loginEmail : ''}</div>
+          </div>
+          <div class="fac-actions">
+            <button class="btn btn-sm" data-edit-account="${acc.id}">${ICON_EDIT}Edit</button>
+            <button class="btn btn-sm primary" data-add-member="${acc.id}" ${full ? 'disabled title="Full"' : ''}>${ICON_ADD_MEMBER}Add member</button>
+          </div>
+        </div>
+        <div class="fac-seatbar"><div class="fill ${fillClass}" style="width:${pct}%;"></div></div>
+        <div class="fac-seatcount ${full ? 'full' : ''}">${filled} / ${acc.capacity}<span class="fac-seatcount-label"> seats filled${full ? ' — full' : ''}</span></div>
+        <div class="fac-members">${rows}</div>
+      </div>`;
+    }).join('');
+
+    body.querySelectorAll('[data-edit-account]').forEach(btn => {
+      btn.addEventListener('click', () => openFamilyAccountModal(btn.dataset.editAccount));
+    });
+    body.querySelectorAll('[data-add-member]').forEach(btn => {
+      if (btn.disabled) return;
+      btn.addEventListener('click', () => openAssignMembershipModal(btn.dataset.addMember));
+    });
+    body.querySelectorAll('[data-renew]').forEach(btn => {
+      btn.addEventListener('click', () => quickRenew(btn.dataset.renew));
+    });
+    body.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.addEventListener('click', () => quickRemove(btn.dataset.remove));
+    });
+  }
+
+  // ---------- Customer lookup ----------
+  const customerLookupInput = document.getElementById('customerLookupInput');
+  if (customerLookupInput) {
+    let lookupTimer;
+    customerLookupInput.addEventListener('input', () => {
+      clearTimeout(lookupTimer);
+      lookupTimer = setTimeout(renderCustomerLookup, 200);
+    });
+  }
+  function renderCustomerLookup(){
+    const box = document.getElementById('customerLookupResult');
+    const query = (customerLookupInput.value || '').trim().toLowerCase();
+    if (!query) { box.style.display = 'none'; return; }
+    const accounts = loadFamilyAccounts();
+    const history = loadMemberships()
+      .filter(m => String(m.customerEmail).toLowerCase().includes(query))
+      .sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+    box.style.display = 'block';
+    if (history.length === 0) {
+      box.innerHTML = `<div class="fac-empty">No history found for "${customerLookupInput.value}".</div>`;
+      return;
+    }
+    box.innerHTML = history.map((m, i) => {
+      const account = accounts.find(a => a.id === m.accountId);
+      const label = account ? account.label : m.serviceId;
+      const status = membershipLiveStatus(m);
+      return `
+      <div class="lookup-history-row" style="animation-delay:${i * 30}ms">
+        <div class="avatar-chip">${initialsFor(m.customerName, m.customerEmail)}</div>
+        <div>
+          <div class="fmr-name">${familyServiceLabel(m.serviceId)} — ${label}</div>
+          <div style="color:var(--text-faint); font-size:0.78rem;">${m.startDate} → ${m.endDate}${m.status === 'removed' ? ` · removed ${(m.removedAt||'').slice(0,10)}, locked until ${m.lockUntil}` : ''}</div>
+        </div>
+        ${familyStatusBadge(status)}
+      </div>`;
+    }).join('');
+  }
+
+  // ---------- Family account modal ----------
+  const familyAccountModal = document.getElementById('familyAccountModal');
+  let editingFamilyAccountId = null;
+  function openFamilyAccountModal(accountId){
+    editingFamilyAccountId = accountId || null;
+    const acc = accountId ? loadFamilyAccounts().find(a => a.id === accountId) : null;
+    document.getElementById('familyAccountModalTitle').textContent = acc ? 'Edit family account' : 'Add family account';
+    document.getElementById('famAccService').value = acc ? acc.serviceId : FAMILY_SERVICE_OPTIONS[0].id;
+    document.getElementById('famAccLabel').value = acc ? acc.label : '';
+    document.getElementById('famAccLoginEmail').value = acc ? acc.loginEmail : '';
+    document.getElementById('famAccCapacity').value = acc ? acc.capacity : 5;
+    document.getElementById('famAccNotes').value = acc ? acc.notes : '';
+    document.getElementById('familyAccountModalError').textContent = '';
+    document.getElementById('deleteFamilyAccountBtn').style.display = acc ? 'inline-flex' : 'none';
+    familyAccountModal.style.display = 'flex';
+  }
+  document.getElementById('addFamilyAccountBtn').addEventListener('click', () => openFamilyAccountModal(null));
+  document.getElementById('closeFamilyAccountModal').addEventListener('click', () => familyAccountModal.style.display = 'none');
+  familyAccountModal.addEventListener('click', e => { if (e.target === familyAccountModal) familyAccountModal.style.display = 'none'; });
+
+  document.getElementById('saveFamilyAccountBtn').addEventListener('click', async () => {
+    const label = document.getElementById('famAccLabel').value.trim();
+    const capacity = parseInt(document.getElementById('famAccCapacity').value, 10);
+    const errorEl = document.getElementById('familyAccountModalError');
+    if (!label) { errorEl.textContent = 'Give this account a label.'; return; }
+    if (!capacity || capacity < 1) { errorEl.textContent = 'Capacity must be at least 1.'; return; }
+    const btn = document.getElementById('saveFamilyAccountBtn');
+    setBtnLoading(btn, true, 'Saving…');
+    try {
+      await saveFamilyAccount({
+        id: editingFamilyAccountId || undefined,
+        serviceId: document.getElementById('famAccService').value,
+        label, capacity,
+        loginEmail: document.getElementById('famAccLoginEmail').value.trim(),
+        notes: document.getElementById('famAccNotes').value.trim()
+      });
+      familyAccountModal.style.display = 'none';
+      renderFamilyPage();
+    } catch (err) {
+      errorEl.textContent = err.message;
+    } finally {
+      setBtnLoading(btn, false);
+    }
+  });
+  document.getElementById('deleteFamilyAccountBtn').addEventListener('click', async () => {
+    if (!editingFamilyAccountId) return;
+    const activeCount = accountSeatCount(editingFamilyAccountId);
+    if (activeCount > 0) {
+      alert(`This account still has ${activeCount} active member(s). Remove them first before deleting the account.`);
+      return;
+    }
+    if (!confirm('Delete this family account? This cannot be undone.')) return;
+    const btn = document.getElementById('deleteFamilyAccountBtn');
+    setBtnLoading(btn, true, 'Deleting…');
+    try {
+      await deleteFamilyAccount(editingFamilyAccountId);
+      familyAccountModal.style.display = 'none';
+      renderFamilyPage();
+    } catch (err) {
+      document.getElementById('familyAccountModalError').textContent = err.message;
+    } finally {
+      setBtnLoading(btn, false);
+    }
+  });
+
+  // ---------- Assign membership modal ----------
+  const assignMembershipModal = document.getElementById('assignMembershipModal');
+  let assigningAccountId = null;
+  function openAssignMembershipModal(accountId, prefill){
+    assigningAccountId = accountId;
+    const acc = loadFamilyAccounts().find(a => a.id === accountId);
+    if (!acc) return;
+    document.getElementById('assignMembershipAccountLabel').textContent =
+      `${acc.label} — ${familyServiceLabel(acc.serviceId)} (${accountSeatCount(acc.id)}/${acc.capacity} filled)`;
+    document.getElementById('assignCustomerName').value = (prefill && prefill.customerName) || '';
+    document.getElementById('assignCustomerEmail').value = (prefill && prefill.customerEmail) || '';
+    document.getElementById('assignDuration').value = '1';
+    document.getElementById('assignStartDate').value = isoDate(new Date());
+    document.getElementById('assignMembershipModalError').textContent = '';
+    document.getElementById('assignLockWarning').style.display = 'none';
+    assignMembershipModal.style.display = 'flex';
+  }
+  document.getElementById('closeAssignMembershipModal').addEventListener('click', () => assignMembershipModal.style.display = 'none');
+  assignMembershipModal.addEventListener('click', e => { if (e.target === assignMembershipModal) assignMembershipModal.style.display = 'none'; });
+
+  document.getElementById('assignCustomerEmail').addEventListener('input', () => {
+    const acc = loadFamilyAccounts().find(a => a.id === assigningAccountId);
+    if (!acc) return;
+    const email = document.getElementById('assignCustomerEmail').value.trim();
+    const warningEl = document.getElementById('assignLockWarning');
+    const lock = email ? findActiveLock(email, acc.serviceId, acc.id) : null;
+    if (lock) {
+      const lockedAccount = loadFamilyAccounts().find(a => a.id === lock.accountId);
+      warningEl.style.display = 'block';
+      warningEl.textContent = `This customer was removed from ${lockedAccount ? lockedAccount.label : 'another account'} and is locked out of joining a *different* ${familyServiceLabel(acc.serviceId)} account until ${lock.lockUntil}. They can only rejoin ${lockedAccount ? lockedAccount.label : 'that same account'}.`;
+    } else {
+      warningEl.style.display = 'none';
+    }
+  });
+
+  document.getElementById('saveAssignMembershipBtn').addEventListener('click', async () => {
+    const acc = loadFamilyAccounts().find(a => a.id === assigningAccountId);
+    const errorEl = document.getElementById('assignMembershipModalError');
+    if (!acc) return;
+    const name = document.getElementById('assignCustomerName').value.trim();
+    const email = document.getElementById('assignCustomerEmail').value.trim();
+    const months = parseInt(document.getElementById('assignDuration').value, 10);
+    const startDate = document.getElementById('assignStartDate').value;
+    if (!email) { errorEl.textContent = 'Customer email is required.'; return; }
+    if (!startDate) { errorEl.textContent = 'Start date is required.'; return; }
+    if (accountSeatCount(acc.id) >= acc.capacity) { errorEl.textContent = 'This account is already full.'; return; }
+    const lock = findActiveLock(email, acc.serviceId, acc.id);
+    if (lock) { errorEl.textContent = `Blocked: locked out of a different account until ${lock.lockUntil}.`; return; }
+
+    const btn = document.getElementById('saveAssignMembershipBtn');
+    setBtnLoading(btn, true, 'Adding…');
+    try {
+      const endDate = isoDate(addMonths(startDate, months));
+      await addMembership({
+        accountId: acc.id, serviceId: acc.serviceId,
+        customerEmail: email, customerName: name,
+        orderId: '', startDate, endDate
+      });
+      assignMembershipModal.style.display = 'none';
+      renderFamilyPage();
+    } catch (err) {
+      errorEl.textContent = err.message;
+    } finally {
+      setBtnLoading(btn, false);
+    }
+  });
 
   function loadProducts(){
     const overrides = productOverridesCache;
@@ -1165,6 +2001,8 @@
   let currentFilter = 'all';
   let currentSearch = '';
   let activeOrderId = null;
+  let currentUserSearch = '';
+  let activeUserEmail = null;
 
   // ============ Render: Dashboard ============
   function renderDashboard(){
@@ -1178,7 +2016,9 @@
     document.getElementById('statOrders').textContent = orders.length;
     document.getElementById('statPending').textContent = pending;
     document.getElementById('statCustomers').textContent = customers;
+    document.getElementById('statUsers').textContent = loadUsers().length;
     document.getElementById('ordersPendingDot').style.background = needsAttention > 0 ? 'var(--accent)' : 'transparent';
+    updateFamilyAttentionDot();
 
     // Revenue by service
     const byService = {};
@@ -1573,6 +2413,127 @@
     }
   });
 
+  // ============ Render: Users ============
+  function renderUsersPage(){
+    const users = loadUsers().filter(u => {
+      if (!currentUserSearch) return true;
+      const s = currentUserSearch.toLowerCase();
+      return (u.name || '').toLowerCase().includes(s) || (u.email || '').toLowerCase().includes(s);
+    });
+    const body = document.getElementById('usersTableBody');
+    const emptyEl = document.getElementById('usersEmpty');
+    document.getElementById('usersCountSub').textContent =
+      `${loadUsers().length} registered user${loadUsers().length === 1 ? '' : 's'}`;
+    if (users.length === 0) {
+      body.innerHTML = '';
+      emptyEl.style.display = 'block';
+    } else {
+      emptyEl.style.display = 'none';
+      body.innerHTML = users.map(u => userRowHTML(u)).join('');
+    }
+    attachUserRowHandlers(body);
+  }
+
+  function userRowHTML(u){
+    const provider = u.provider || 'password';
+    return `
+    <tr data-email="${escapeHTML(u.email)}">
+      <td class="cell-customer"><div class="name">${escapeHTML(u.name || '—')}</div></td>
+      <td style="color:var(--text-dim); font-size:0.85rem;">${escapeHTML(u.email)}</td>
+      <td style="color:var(--text-faint); font-size:0.82rem; text-transform:capitalize;">${escapeHTML(provider)}</td>
+      <td style="text-align:right;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-faint);"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      </td>
+    </tr>`;
+  }
+
+  function attachUserRowHandlers(container){
+    container.querySelectorAll('tr[data-email]').forEach(row => {
+      row.addEventListener('click', () => openUserModal(row.dataset.email));
+    });
+  }
+
+  document.getElementById('userSearch').addEventListener('input', e => {
+    currentUserSearch = e.target.value;
+    renderUsersPage();
+  });
+
+  // ============ User modal ============
+  const userModal = document.getElementById('userModal');
+
+  function openUserModal(email){
+    const user = loadUsers().find(u => u.email === email);
+    if (!user) return;
+    activeUserEmail = email;
+    document.getElementById('euName').value = user.name || '';
+    document.getElementById('euEmail').value = user.email || '';
+    document.getElementById('euProvider').value = user.provider || '';
+    document.getElementById('euPhotoUrl').value = user.photoUrl || '';
+    document.getElementById('euNewPassword').value = '';
+    document.getElementById('userModalError').textContent = '';
+    userModal.style.display = 'flex';
+  }
+
+  document.getElementById('closeUserModal').addEventListener('click', () => userModal.style.display = 'none');
+  userModal.addEventListener('click', e => { if (e.target === userModal) userModal.style.display = 'none'; });
+
+  document.getElementById('saveUserBtn').addEventListener('click', async () => {
+    const errorEl = document.getElementById('userModalError');
+    const name = document.getElementById('euName').value.trim();
+    const email = document.getElementById('euEmail').value.trim();
+    const provider = document.getElementById('euProvider').value.trim();
+    const photoUrl = document.getElementById('euPhotoUrl').value.trim();
+    const newPassword = document.getElementById('euNewPassword').value;
+
+    if (!email) {
+      errorEl.textContent = 'Email is required.';
+      return;
+    }
+    errorEl.textContent = '';
+
+    const saveBtn = document.getElementById('saveUserBtn');
+    const deleteBtn = document.getElementById('deleteUserBtn');
+    setBtnLoading(saveBtn, true, 'Saving…');
+    deleteBtn.disabled = true;
+    try {
+      const data = { email, name, provider, photoUrl };
+      if (newPassword) data.passwordHash = await hashPassword(newPassword);
+      await saveUserAdmin(activeUserEmail, data);
+      userModal.style.display = 'none';
+      renderUsersPage();
+      renderDashboard();
+    } catch (err) {
+      console.error('Failed to save user:', err);
+      errorEl.textContent = err.message || 'Could not save — check your connection and try again.';
+    } finally {
+      setBtnLoading(saveBtn, false);
+      deleteBtn.disabled = false;
+    }
+  });
+
+  document.getElementById('deleteUserBtn').addEventListener('click', async () => {
+    if (!confirm('Delete this user account permanently? This does not affect their past orders.')) return;
+    const errorEl = document.getElementById('userModalError');
+    errorEl.textContent = '';
+
+    const saveBtn = document.getElementById('saveUserBtn');
+    const deleteBtn = document.getElementById('deleteUserBtn');
+    setBtnLoading(deleteBtn, true, 'Deleting…');
+    saveBtn.disabled = true;
+    try {
+      await deleteUserAdmin(activeUserEmail);
+      userModal.style.display = 'none';
+      renderUsersPage();
+      renderDashboard();
+    } catch (err) {
+      console.error('Failed to delete user:', err);
+      errorEl.textContent = 'Could not delete — check your connection and try again.';
+    } finally {
+      setBtnLoading(deleteBtn, false);
+      saveBtn.disabled = false;
+    }
+  });
+
   // ============ Render: Products ============
   function renderProductsPage(){
     const products = loadProducts();
@@ -1879,12 +2840,13 @@
   async function renderAll(isFirstLoad){
     if (isFirstLoad) showSkeletons();
     await refreshCache();
-    ['statRevenue', 'statOrders', 'statPending', 'statCustomers'].forEach(id => {
+    ['statRevenue', 'statOrders', 'statPending', 'statCustomers', 'statUsers'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.classList.remove('is-loading');
     });
     renderDashboard();
     renderOrders();
+    renderUsersPage();
     // Never auto-redraw the Products grid while the admin is actively on
     // that page — a background poll mid-edit would wipe unsaved price
     // changes and can visually revert a toggle that's still mid-save.
