@@ -260,6 +260,7 @@
     --shadow-soft: rgba(0,0,0,0.45);
     --shadow-strong: rgba(0,0,0,0.6);
     --btn-ink:#0a0b10;
+    --container-max:1180px;
   }
 
   html[data-theme="light"]{
@@ -424,7 +425,7 @@
     font-family:'Noto Sans Sinhala','Inter', system-ui, sans-serif;
   }
 
-  .container{max-width:1180px;margin:0 auto;padding:0 2rem;}
+  .container{max-width:var(--container-max);margin:0 auto;padding:0 2rem;}
 
   h1,h2,h3,.display{font-family:'Outfit', sans-serif;}
   body.lang-si h1, body.lang-si h2, body.lang-si h3, body.lang-si .display{
@@ -457,8 +458,8 @@
     background:rgba(246,246,249,0.97);
   }
   .header-inner{
-    display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
-    padding:1.1rem 2rem; max-width:1180px; margin:0 auto; gap:0.8rem;
+    display:grid; grid-template-columns:auto 1fr auto; align-items:center;
+    padding:1.1rem 2rem; max-width:var(--container-max); margin:0 auto; gap:0.8rem;
   }
   .logo{
     justify-self:start;
@@ -534,6 +535,35 @@
     position:absolute; top:-6px; right:-6px;
     box-shadow:0 0 0 2px var(--bg);
   }
+
+  /* Hamburger menu toggle — hidden on desktop, shown once nav-links can no
+     longer fit inline (see the max-width:899px block below). Doing this via
+     a real toggle (instead of just hiding the nav) keeps Plans/How it
+     works/FAQ reachable on phones and tablets. */
+  .nav-toggle{
+    display:none; flex:none; width:38px; height:38px;
+    align-items:center; justify-content:center;
+    background:var(--bg-raised); border:1px solid var(--line); border-radius:10px;
+    cursor:pointer; padding:0;
+  }
+  .nav-toggle span{
+    display:block; position:relative; width:16px; height:2px;
+    background:var(--text); border-radius:2px;
+    transition:transform .25s ease, opacity .25s ease;
+  }
+  .nav-toggle span::before, .nav-toggle span::after{
+    content:''; position:absolute; left:0; width:16px; height:2px;
+    background:var(--text); border-radius:2px; transition:transform .25s ease, top .25s ease;
+  }
+  .nav-toggle span::before{ top:-5px; }
+  .nav-toggle span::after{ top:5px; }
+  .nav-toggle[aria-expanded="true"] span{ background:transparent; }
+  .nav-toggle[aria-expanded="true"] span::before{ top:0; transform:rotate(45deg); }
+  .nav-toggle[aria-expanded="true"] span::after{ top:0; transform:rotate(-45deg); }
+
+  /* Empty on desktop — the language toggle only gets moved in here (via JS)
+     once the layout switches to the mobile hamburger menu. */
+  .nav-lang-slot{ display:none; }
 
   /* ---------- Hero ---------- */
   .hero{
@@ -640,15 +670,48 @@
   }
 
   .hero-stat-icon{
+    position:relative;
     width:50px; height:50px; border-radius:13px; flex:none;
     background:linear-gradient(135deg,var(--accent),var(--accent-2));
     display:flex; align-items:center; justify-content:center;
     box-shadow:0 8px 20px rgba(var(--glow),0.35);
+    animation:heroStatGlow 3.2s ease-in-out infinite;
+    overflow:hidden;
   }
-  .hero-stat-icon svg{width:25px; height:25px; color:#0a0b10;}
-  .hero-stat-text{text-align:left; min-width:0;}
+  html.reduced-fx .hero-stat-icon{ animation:none; }
+  @keyframes heroStatGlow{
+    0%,100%{ box-shadow:0 8px 20px rgba(var(--glow),0.35); }
+    50%{ box-shadow:0 10px 26px rgba(var(--glow),0.6); }
+  }
+  .hero-stat-icon-inner{
+    display:flex; align-items:center; justify-content:center;
+    transition:opacity .35s ease, transform .45s cubic-bezier(.34,1.56,.64,1);
+    opacity:1; transform:scale(1) rotate(0deg);
+  }
+  .hero-stat-icon-inner.is-swapping{
+    opacity:0; transform:scale(0.35) rotate(-100deg);
+  }
+  .hero-stat-icon-inner svg{width:25px; height:25px; color:#0a0b10;}
+  .hero-stat-text{text-align:left; min-width:0; overflow:hidden;}
+  .hero-stat-text-inner{
+    transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.2,.64,1);
+    opacity:1; transform:translateY(0);
+  }
+  .hero-stat-text-inner.is-swapping{
+    opacity:0; transform:translateY(10px);
+  }
   .hero-stat-number{font-size:1.55rem; font-weight:800; line-height:1.2; letter-spacing:-0.01em;}
   .hero-stat-label{font-size:0.78rem; color:var(--text-faint); line-height:1.35;}
+  .hero-stat-dots{
+    display:flex; gap:0.32rem; margin-top:0.6rem;
+  }
+  .hero-stat-dots span{
+    width:5px; height:5px; border-radius:50%;
+    background:var(--line); transition:background .35s ease, transform .35s ease;
+  }
+  .hero-stat-dots span.is-active{
+    background:var(--accent-2); transform:scale(1.35);
+  }
 
   .hero-testimonial{
     position:relative;
@@ -1244,9 +1307,33 @@
   }
   .logout-link:hover{ border-color:var(--accent); color:var(--accent); }
 
+  @media (max-width:899px){
+    .nav-toggle{display:inline-flex; order:5;}
+    .header-right > .lang-toggle{display:none;}
+    .nav-links{
+      display:flex; flex-direction:column; gap:0;
+      position:absolute; top:100%; left:0; right:0;
+      background:var(--bg-raised); border-bottom:1px solid var(--line);
+      padding:0.5rem 1.2rem 1rem; margin:0;
+      box-shadow:0 16px 30px var(--shadow-soft, rgba(0,0,0,0.35));
+      opacity:0; visibility:hidden; transform:translateY(-8px);
+      transition:opacity .2s ease, transform .2s ease, visibility .2s;
+    }
+    .nav-links.is-open{
+      opacity:1; visibility:visible; transform:translateY(0);
+    }
+    .nav-links a{
+      padding:0.85rem 0.2rem; border-bottom:1px solid var(--line); font-size:1rem;
+    }
+    .nav-links a:last-of-type{ border-bottom:none; }
+    .nav-lang-slot{
+      display:flex; align-items:center; justify-content:flex-end;
+      padding:0.9rem 0.2rem 0.2rem; margin-top:0.2rem; border-top:1px solid var(--line);
+    }
+  }
+
   @media (max-width:640px){
     .header-inner{padding:0.8rem 1rem; gap:0.5rem;}
-    .nav-links{display:none;}
     .container{padding:0 1.2rem;}
     .how-it-works{padding:2rem 1.4rem;}
     .header-right{gap:0.4rem;}
@@ -1317,6 +1404,42 @@
     .product-card{ animation:none; }
     .bubble-loader .bubble{ animation:none; opacity:0.85; }
   }
+
+  /* ---------- Large screens ----------
+     The layout is capped at 1180px by default, which is deliberate for
+     readability, but on big monitors that leaves a lot of dead margin AND
+     makes every element (icons, buttons, cards, text) look small relative
+     to the screen. Two things happen together here:
+       1) the container gets a bit wider so more of the screen is used, and
+       2) `zoom` scales the whole page uniformly at bigger resolutions —
+          unlike bumping individual font-sizes, zoom scales every box,
+          icon, border and gap by the same factor, so nothing's ratio to
+          anything else changes, it's just rendered bigger. */
+  @media (min-width:1440px){
+    :root{ --container-max:1320px; }
+    .products-grid{ grid-template-columns:repeat(auto-fit, minmax(270px, 1fr)); gap:1.7rem; }
+    .hero-grid{ gap:3.5rem; }
+  }
+  @media (min-width:1920px){
+    :root{ --container-max:1400px; }
+    body{ zoom:1.15; }
+    /* `zoom` re-scales any length it lays out — including a value that
+       came from a vh calc. min-height:calc(100vh - 76px) on .hero (and
+       min-height:100vh on body) would get scaled a second time on top of
+       the real viewport height, making the hero render taller than the
+       screen and pushing content down with a big empty gap. A fixed rem
+       value sidesteps that mismatch completely (rem scales predictably
+       with zoom, vh doesn't) while still landing close to a full first
+       screen at 1920x1080, so the next section stays below the fold until
+       the visitor scrolls, instead of visibly poking into view. */
+    body{ min-height:auto; }
+    .hero{ min-height:48rem; }
+  }
+  @media (min-width:2560px){
+    :root{ --container-max:1600px; }
+    body{ zoom:1.3; }
+    .hero{ min-height:54rem; }
+  }
 </style>
 </head>
 <body>
@@ -1368,12 +1491,16 @@
         <div class="logo-mark">P</div>
         <div class="logo-text">Preksha<span>.store</span></div>
       </div>
-      <nav class="nav-links">
+      <nav class="nav-links" id="navLinks">
         <a href="#plans" data-i18n="nav_plans">Plans</a>
         <a href="#how" data-i18n="nav_how">How it works</a>
         <a href="#faq" data-i18n="nav_faq">FAQ</a>
+        <div class="nav-lang-slot" id="navLangSlot"></div>
       </nav>
       <div class="header-right">
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks">
+          <span></span>
+        </button>
         <div class="lang-toggle" id="langToggle" data-lang="en" role="button" aria-label="Switch language">
           <div class="lang-thumb"></div>
           <div class="lang-opt opt-en">EN</div>
@@ -1424,11 +1551,16 @@
               </div>
               <div class="hero-info-card hero-stat-card">
                 <div class="hero-stat-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+                  <div class="hero-stat-icon-inner" id="heroStatIconInner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+                  </div>
                 </div>
                 <div class="hero-stat-text">
-                  <div class="hero-stat-number" data-i18n="hero_stat_number">Save up to 65%</div>
-                  <div class="hero-stat-label" data-i18n="hero_stat_label">vs. paying for a full plan alone</div>
+                  <div class="hero-stat-text-inner" id="heroStatTextInner">
+                    <div class="hero-stat-number" id="heroStatNumber">Save up to 65%</div>
+                    <div class="hero-stat-label" id="heroStatLabel">vs. paying for a full plan alone</div>
+                  </div>
+                  <div class="hero-stat-dots" id="heroStatDots"></div>
                 </div>
               </div>
             </div>
@@ -1573,6 +1705,12 @@
       hero_visual_label:'Supported platforms',
       hero_stat_number:'Save up to 65%',
       hero_stat_label:'vs. paying for a full plan alone',
+      hero_stats:[
+        {number:'Save up to 65%', label:'vs. paying for a full plan alone', icon:'growth'},
+        {number:'2,400+ Members', label:'trust our shared plans every month', icon:'users'},
+        {number:'Ready within 24h', label:'from checkout to full access', icon:'clock'},
+        {number:'Cancel anytime', label:'no contracts, no long-term lock-in', icon:'shield'}
+      ],
       hero_testimonials:[
         {quote:'"Set up in under an hour and saved me more than half what I was paying before."', name:'Nadeesha, Colombo'},
         {quote:'"Cancelled all my separate subscriptions the same week. Support replies fast too."', name:'Kavindu, Kandy'},
@@ -1694,6 +1832,12 @@
       hero_visual_label:'සහාය දක්වන වේදිකා',
       hero_stat_number:'65% දක්වා ඉතිරි කරගන්න',
       hero_stat_label:'සම්පූර්ණ සැලසුමක් තනිව ගෙවනවාට වඩා',
+      hero_stats:[
+        {number:'65% දක්වා ඉතිරි කරගන්න', label:'සම්පූර්ණ සැලසුමක් තනිව ගෙවනවාට වඩා', icon:'growth'},
+        {number:'සාමාජිකයන් 2,400+', label:'සෑම මසකම අපගේ බෙදාගත් සැලසුම් විශ්වාස කරයි', icon:'users'},
+        {number:'පැය 24ක් ඇතුළත සූදානම්', label:'ගෙවීමේ සිට සම්පූර්ණ ප්‍රවේශය දක්වා', icon:'clock'},
+        {number:'ඕනෑම වේලාවක අවලංගු කරන්න', label:'කිසිදු ගිවිසුමක් හෝ දිගු කාලීන බැඳීමක් නැත', icon:'shield'}
+      ],
       hero_testimonials:[
         {quote:'"පැයකටත් අඩු කාලයකින් සකසා ගත් අතර මම කලින් ගෙවූවාට වඩා අඩකටත් වඩා ඉතිරි කරගත්තා."', name:'නදීෂා, කොළඹ'},
         {quote:'"මගේ වෙනම දායකත්ව සියල්ල එම සතියේම අවලංගු කළා. සහාය සේවාවත් ඉක්මනින් පිළිතුරු දෙනවා."', name:'කවින්දු, මහනුවර'},
@@ -1831,6 +1975,7 @@
     renderCartModal();
     renderAccountUI();
     renderHeroTestimonial();
+    renderHeroStat();
     if (authModal.classList.contains('is-open')) renderAuthModal();
   }
 
@@ -1871,6 +2016,62 @@
     clearInterval(heroTestimonialTimer);
     renderHeroTestimonial();
     heroTestimonialTimer = setInterval(swapHeroTestimonial, 5000);
+  }
+
+  // ============ Hero stat card rotation (icon + number + label) ============
+  const heroStatIconSVG = {
+    growth: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>',
+    users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>',
+    shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5.5c0 4.6 3 8.3 7 9.5 4-1.2 7-4.9 7-9.5V6z"/><path d="M9 12l2 2 4-4.5"/></svg>'
+  };
+
+  let heroStatIndex = 0;
+  let heroStatTimer = null;
+
+  function getHeroStats() {
+    return (translations[currentLang] && translations[currentLang].hero_stats) || [];
+  }
+
+  function renderHeroStatDots(list) {
+    const dotsEl = document.getElementById('heroStatDots');
+    if (!dotsEl || list.length < 2) { if (dotsEl) dotsEl.innerHTML = ''; return; }
+    dotsEl.innerHTML = list.map((_, i) => `<span class="${i === heroStatIndex % list.length ? 'is-active' : ''}"></span>`).join('');
+  }
+
+  function renderHeroStat() {
+    const list = getHeroStats();
+    const numberEl = document.getElementById('heroStatNumber');
+    const labelEl = document.getElementById('heroStatLabel');
+    const iconEl = document.getElementById('heroStatIconInner');
+    if (!list.length || !numberEl || !labelEl || !iconEl) return;
+    const item = list[heroStatIndex % list.length];
+    numberEl.textContent = item.number;
+    labelEl.textContent = item.label;
+    iconEl.innerHTML = heroStatIconSVG[item.icon] || heroStatIconSVG.growth;
+    renderHeroStatDots(list);
+  }
+
+  function swapHeroStat() {
+    const list = getHeroStats();
+    const textInner = document.getElementById('heroStatTextInner');
+    const iconInner = document.getElementById('heroStatIconInner');
+    if (!textInner || !iconInner || list.length < 2) return;
+    textInner.classList.add('is-swapping');
+    iconInner.classList.add('is-swapping');
+    setTimeout(() => {
+      heroStatIndex = (heroStatIndex + 1) % list.length;
+      renderHeroStat();
+      textInner.classList.remove('is-swapping');
+      iconInner.classList.remove('is-swapping');
+    }, 400);
+  }
+
+  function startHeroStatRotation() {
+    clearInterval(heroStatTimer);
+    heroStatIndex = 0;
+    renderHeroStat();
+    heroStatTimer = setInterval(swapHeroStat, 4200);
   }
 
   // ============ Theme ============
@@ -2006,6 +2207,84 @@
   const cartModal = document.getElementById('cartModal');
   const closeModal = document.getElementById('closeModal');
   const cartContent = document.getElementById('cartContent');
+
+  // Mobile/tablet hamburger nav — opens the nav-links dropdown, closes on
+  // link click, outside click, or Escape.
+  const navToggle = document.getElementById('navToggle');
+  const navLinksEl = document.getElementById('navLinks');
+  if (navToggle && navLinksEl) {
+    const setNavOpen = (open) => {
+      navLinksEl.classList.toggle('is-open', open);
+      navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
+    navToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setNavOpen(!navLinksEl.classList.contains('is-open'));
+    });
+    navLinksEl.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => setNavOpen(false));
+    });
+    document.addEventListener('click', (e) => {
+      if (!navLinksEl.classList.contains('is-open')) return;
+      if (!navLinksEl.contains(e.target) && !navToggle.contains(e.target)) setNavOpen(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') setNavOpen(false);
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 899) setNavOpen(false);
+    });
+  }
+
+  // Move the language toggle between the header and the mobile dropdown
+  // depending on viewport width, instead of duplicating its markup/logic.
+  const langToggleEl = document.getElementById('langToggle');
+  const navLangSlot = document.getElementById('navLangSlot');
+  const themeToggleEl = document.getElementById('themeToggle');
+  const headerRightEl = document.querySelector('.header-right');
+  if (langToggleEl && navLangSlot && headerRightEl) {
+    const mobileNavQuery = window.matchMedia('(max-width:899px)');
+    const placeLangToggle = (e) => {
+      if (e.matches) {
+        navLangSlot.appendChild(langToggleEl);
+      } else if (themeToggleEl) {
+        headerRightEl.insertBefore(langToggleEl, themeToggleEl);
+      } else {
+        headerRightEl.insertBefore(langToggleEl, headerRightEl.firstChild);
+      }
+    };
+    placeLangToggle(mobileNavQuery);
+    mobileNavQuery.addEventListener('change', placeLangToggle);
+  }
+
+  // Keep the hero filling the first screen on large monitors. CSS alone
+  // can't do this precisely once `zoom` is active (min-width:1920px+) —
+  // any length derived from vh gets scaled a second time by zoom, and a
+  // fixed rem guess can't account for every real screen height. Measure
+  // the actual rendered header height and real viewport height in JS
+  // instead (both unaffected by the zoom quirk), divide by the zoom
+  // factor to convert back into the pre-zoom length the CSS layout
+  // expects, and set that as the hero's min-height directly.
+  (function () {
+    const heroEl = document.querySelector('.hero');
+    const headerEl = document.querySelector('header');
+    if (!heroEl || !headerEl) return;
+    const bigScreenQuery = window.matchMedia('(min-width:1920px)');
+    function fitHero() {
+      if (!bigScreenQuery.matches) {
+        heroEl.style.minHeight = '';
+        return;
+      }
+      const zoom = parseFloat(getComputedStyle(document.body).zoom) || 1;
+      const headerH = headerEl.getBoundingClientRect().height;
+      const available = window.innerHeight - headerH;
+      if (available > 0) heroEl.style.minHeight = (available / zoom) + 'px';
+    }
+    fitHero();
+    window.addEventListener('resize', fitHero);
+    window.addEventListener('load', fitHero);
+    bigScreenQuery.addEventListener('change', fitHero);
+  })();
 
   const bubbleLoaderHTML = `<div class="bubble-loader" aria-hidden="true"><span class="bubble"></span><span class="bubble"></span><span class="bubble"></span></div>`;
 
@@ -3441,6 +3720,7 @@
   applyLanguage(currentLang);
   updateCartUI();
   startHeroTestimonialRotation();
+  startHeroStatRotation();
 
   try {
     await Promise.all([applyProductOverrides(), mergeCustomProducts()]);
